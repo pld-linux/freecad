@@ -5,16 +5,16 @@
 %bcond_with	bundled_pycxx	# use bundled version of pycxx
 %bcond_with	bundled_smesh	# use bundled version of Salome's Mesh
 
-# This revision is 0.13 final.
-%define	rev 3702
+# This revision is 0.15 final.
+%define	rev 4671
 Summary:	A general purpose 3D CAD modeler
 Name:		freecad
-Version:	0.14
+Version:	0.15
 Release:	0.1
 License:	GPL v2+
 Group:		Applications/Engineering
-Source0:	http://downloads.sourceforge.net/free-cad/%{name}-%{version}.%{rev}.tar.gz
-# Source0-md5:	234747bdff47a62fd10cb902f3dd772b
+Source0:	http://downloads.sourceforge.net/project/free-cad/FreeCAD%20Source/%{name}_%{version}.%{rev}.tar.gz
+# Source0-md5:	7afa95d3e8cd845bef83202e76db7f24
 Source101:	%{name}.desktop
 Source102:	%{name}.1
 Source103:	%{name}.appdata.xml
@@ -24,38 +24,34 @@ Patch1:		%{name}-0.14-Xlib_h.patch
 Patch2:		%{name}-0.14-smesh.patch
 Patch3:		%{name}-0.14-DraftSnap.patch
 #Patch4: %{name}-0.14-disable_auto_dxf_dl.patch
-URL:		http://sourceforge.net/apps/mediawiki/free-cad/
+URL:		http://freecadweb.org/
 # Utilities
 BuildRequires:	cmake
 BuildRequires:	desktop-file-utils
 BuildRequires:	dos2unix
 BuildRequires:	doxygen
-BuildRequires:	gcc-gfortran
+BuildRequires:	gcc-fortran
 BuildRequires:	gettext
 BuildRequires:	graphviz
 BuildRequires:	swig
 BuildRequires:	tbb-devel
 # Development Libraries
-BuildRequires:	freeimage-devel
-BuildRequires:	mesa-libGLU-devel
+BuildRequires:	FreeImage-devel
+BuildRequires:	Mesa-libGLU-devel
 BuildRequires:	xorg-lib-libXmu-devel
 %if %{with occ}
 BuildRequires:	OpenCASCADE-devel
 %else
 BuildRequires:	OCE-devel
 %endif
-# Not yet in Fedora
-# https://bugzilla.redhat.com/show_bug.cgi?id=665733
-BuildRequires:	Coin2-devel
-#BuildRequires:  Coin3-devel
+BuildRequires:	Coin-devel
 BuildRequires:	SoQt-devel
 BuildRequires:	boost-devel
-BuildRequires:	eigen3-devel
+BuildRequires:	eigen3
 BuildRequires:	python-devel
 BuildRequires:	qt-devel
 BuildRequires:	qt-webkit-devel
-# Not used yet.
-BuildRequires:	libappstream-glib
+BuildRequires:	appstream-glib-devel
 BuildRequires:	libicu-devel
 BuildRequires:	libspnav-devel
 BuildRequires:	netgen-mesher-devel
@@ -64,7 +60,7 @@ BuildRequires:	netgen-mesher-devel
 BuildRequires:	python-matplotlib
 %{!?with_bundled_pycxx:BuildRequires:	python-pycxx-devel}
 BuildRequires:	python-pyside-devel
-BuildRequires:	shiboken-devel
+BuildRequires:	shiboken
 %{!?with_bundled_smesh:BuildRequires:	smesh-devel}
 BuildRequires:	xerces-c
 BuildRequires:	xerces-c-devel
