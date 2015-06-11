@@ -1,9 +1,9 @@
 #
 # Conditional build:
 %bcond_with	occ		# Compile using OpenCASCADE instead of OCE
-%bcond_with	bundled_zipios 		# use bundled version of zipios++
-%bcond_with	bundled_pycxx	# use bundled version of pycxx
-%bcond_with	bundled_smesh	# use bundled version of Salome's Mesh
+%bcond_without	system_zipios 		# use system version of zipios++
+%bcond_without	system_pycxx	# use system version of pycxx
+%bcond_without	system_smesh	# use system version of Salome's Mesh
 
 # This revision is 0.15 final.
 %define	rev 4671
@@ -19,11 +19,10 @@ Source101:	%{name}.desktop
 Source102:	%{name}.1
 Source103:	%{name}.appdata.xml
 Source104:	%{name}.sharedmimeinfo
-Patch0:		%{name}-3rdParty.patch
-Patch1:		%{name}-0.14-Xlib_h.patch
-Patch2:		%{name}-0.14-smesh.patch
-Patch3:		%{name}-0.14-DraftSnap.patch
-#Patch4: %{name}-0.14-disable_auto_dxf_dl.patch
+Patch0:		freecad-3rdParty.patch
+Patch1:		freecad-0.14-Xlib_h.patch
+Patch2:		freecad-0.15-zipios.patch
+Patch3:		freecad-0.14-Version_h.patch
 URL:		http://freecadweb.org/
 # Utilities
 BuildRequires:	cmake
@@ -56,19 +55,17 @@ BuildRequires:	netgen-mesher-devel
 #BuildRequires:  opencv-devel
 BuildRequires:	python-devel
 BuildRequires:	python-matplotlib
-%{!?with_bundled_pycxx:BuildRequires:	python-pycxx-devel}
-BuildRequires:	python-pyside-devel
+%{?with_system_pycxx:BuildRequires:	python-pycxx-devel}
+BuildRequires:	python-PySide-devel
+BuildRequires:	pyside-tools
 BuildRequires:	qt-devel
-BuildRequires:	qt-webkit-devel
+BuildRequires:	QtWebKit-devel
 BuildRequires:	shiboken
-%{!?with_bundled_smesh:BuildRequires:	smesh-devel}
 BuildRequires:	xerces-c
 BuildRequires:	xerces-c-devel
-%{!?with_bundled_zipios:BuildRequires:	zipios++-devel}
+%{?with_system_zipios:BuildRequires:	zipios++-devel}
 Requires:	%{name}-data = %{version}-%{release}
 Requires:	glib2 >= 1:2.26.0
-# Obsolete old doc package since it's required for functionality.
-Obsoletes:	freecad-doc < 0.13-5
 # Needed for plugin support and is not a soname dependency.
 Requires:	hicolor-icon-theme
 Requires:	python-collada
@@ -108,9 +105,7 @@ system.
 %package data
 Summary:	Data files for FreeCAD
 Requires:	%{name} = %{version}-%{release}
-%if "%{_rpmversion}" >= "5"
 BuildArch:	noarch
-%endif
 
 %description data
 Data files for FreeCAD.
@@ -118,16 +113,15 @@ Data files for FreeCAD.
 %prep
 %setup -q -n %{name}-%{version}.%{rev}
 %patch0 -p1
-%if %{without bundled_pycxx}
-rm -r src/CXX
-%endif
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
-# Patch comes from upstream/master, doesn't apply cleanly to 0.14.
-#patch4 -p1
 
-%if %{without bundled_zipios}
+%if %{with system_pycxx}
+rm -r src/CXX
+%endif
+
+%if %{with system_zipios}
 rm -r src/zipios++
 %endif
 
@@ -137,16 +131,12 @@ dos2unix -k src/Mod/Test/unittestgui.py \
 	copying.lib \
 	data/License.txt
 
-# Removed bundled libraries
+# Removed system libraries
 rm -r src/3rdParty
 
 %build
 install -d build
 cd build
-
-# Deal with cmake projects that tend to link excessively.
-export LDFLAGS="%{rpmcflags} -Wl,--as-needed -Wl,--no-undefined"
-
 %cmake \
 	-DCMAKE_INSTALL_PREFIX=%{_libdir}/%{name} \
 	-DCMAKE_INSTALL_DATADIR=%{_datadir}/%{name} \
@@ -159,14 +149,14 @@ export LDFLAGS="%{rpmcflags} -Wl,--as-needed -Wl,--no-undefined"
 %if %{with occ}
 	-DUSE_OCC=TRUE \
 %endif
-%if %{without bundled_smesh}
+%if %{with system_smesh}
 	-DFREECAD_USE_EXTERNAL_SMESH=TRUE \
 	-DSMESH_INCLUDE_DIR=%{_includedir}/smesh \
 %endif
-%if %{without bundled_zipios}
+%if %{with system_zipios}
 	-DFREECAD_USE_EXTERNAL_ZIPIOS=TRUE \
 %endif
-%if %{without bundled_pycxx}
+%if %{with system_pycxx}
 	-DPYCXX_INCLUDE_DIR=$(pkg-config --variable=includedir PyCXX) \
 	-DPYCXX_SOURCE_DIR=$(pkg-config --variable=srcdir PyCXX) \
 %endif
@@ -198,9 +188,9 @@ install -pD src/Gui/Icons/%{name}.svg $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/s
 # Install man page
 install -pD %{SOURCE102} $RPM_BUILD_ROOT%{_mandir}/man1/%{name}.1
 
-# Symlink manpage to other binary names
-ln -s %{name}.1 $RPM_BUILD_ROOT%{_mandir}/man1/FreeCAD.1
-ln -s %{name}.1 $RPM_BUILD_ROOT%{_mandir}/man1/FreeCADCmd.1
+# groff link manpage to other binary names
+echo %{name}.1 > $RPM_BUILD_ROOT%{_mandir}/man1/FreeCAD.1
+echo %{name}.1 > $RPM_BUILD_ROOT%{_mandir}/man1/FreeCADCmd.1
 
 # Remove obsolete Start_Page.html
 rm $RPM_BUILD_ROOT%{_docdir}/%{name}/Start_Page.html
