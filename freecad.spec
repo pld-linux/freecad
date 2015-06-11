@@ -13,7 +13,7 @@ Version:	0.15
 Release:	0.1
 License:	GPL v2+
 Group:		Applications/Engineering
-Source0:	http://downloads.sourceforge.net/project/free-cad/FreeCAD%20Source/%{name}_%{version}.%{rev}.tar.gz
+Source0:	http://downloads.sourceforge.net/free-cad/%{name}_%{version}.%{rev}.tar.gz
 # Source0-md5:	7afa95d3e8cd845bef83202e76db7f24
 Source101:	%{name}.desktop
 Source102:	%{name}.1
@@ -46,20 +46,20 @@ BuildRequires:	OCE-devel
 %endif
 BuildRequires:	Coin-devel
 BuildRequires:	SoQt-devel
+BuildRequires:	appstream-glib-devel
 BuildRequires:	boost-devel
 BuildRequires:	eigen3
-BuildRequires:	python-devel
-BuildRequires:	qt-devel
-BuildRequires:	qt-webkit-devel
-BuildRequires:	appstream-glib-devel
 BuildRequires:	libicu-devel
 BuildRequires:	libspnav-devel
 BuildRequires:	netgen-mesher-devel
 #BuildRequires:  ode-devel
 #BuildRequires:  opencv-devel
+BuildRequires:	python-devel
 BuildRequires:	python-matplotlib
 %{!?with_bundled_pycxx:BuildRequires:	python-pycxx-devel}
 BuildRequires:	python-pyside-devel
+BuildRequires:	qt-devel
+BuildRequires:	qt-webkit-devel
 BuildRequires:	shiboken
 %{!?with_bundled_smesh:BuildRequires:	smesh-devel}
 BuildRequires:	xerces-c
