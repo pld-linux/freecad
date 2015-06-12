@@ -19,10 +19,10 @@ Source101:	%{name}.desktop
 Source102:	%{name}.1
 Source103:	%{name}.appdata.xml
 Source104:	%{name}.sharedmimeinfo
-Patch0:		freecad-3rdParty.patch
-Patch1:		freecad-0.14-Xlib_h.patch
-Patch2:		freecad-0.15-zipios.patch
-Patch3:		freecad-0.14-Version_h.patch
+Patch0:		%{name}-3rdParty.patch
+Patch1:		%{name}-0.14-Xlib_h.patch
+Patch2:		%{name}-0.15-zipios.patch
+Patch3:		%{name}-0.14-Version_h.patch
 URL:		http://freecadweb.org/
 # Utilities
 BuildRequires:	cmake
@@ -32,6 +32,7 @@ BuildRequires:	doxygen
 BuildRequires:	gcc-fortran
 BuildRequires:	gettext
 BuildRequires:	graphviz
+%{?with_system_smesh:BuildRequires:  smesh-devel}
 BuildRequires:	swig
 BuildRequires:	tbb-devel
 # Development Libraries
@@ -44,6 +45,7 @@ BuildRequires:	OpenCASCADE-devel
 BuildRequires:	OCE-devel
 %endif
 BuildRequires:	Coin-devel
+BuildRequires:	QtWebKit-devel
 BuildRequires:	SoQt-devel
 BuildRequires:	appstream-glib-devel
 BuildRequires:	boost-devel
@@ -53,13 +55,12 @@ BuildRequires:	libspnav-devel
 BuildRequires:	netgen-mesher-devel
 #BuildRequires:  ode-devel
 #BuildRequires:  opencv-devel
+BuildRequires:	pyside-tools
+BuildRequires:	python-PySide-devel
 BuildRequires:	python-devel
 BuildRequires:	python-matplotlib
 %{?with_system_pycxx:BuildRequires:	python-pycxx-devel}
-BuildRequires:	python-PySide-devel
-BuildRequires:	pyside-tools
 BuildRequires:	qt-devel
-BuildRequires:	QtWebKit-devel
 BuildRequires:	shiboken
 BuildRequires:	xerces-c
 BuildRequires:	xerces-c-devel
@@ -76,7 +77,7 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # Maintainers:  keep this list of plugins up to date
 # List plugins in %%{_libdir}/freecad/lib, less '.so' and 'Gui.so', here
-%define	plugins Assembly Complete Drawing Fem FreeCAD Image Import Inspection Mesh MeshPart Part Points QtUnit Raytracing ReverseEngineering Robot Sketcher Start Web PartDesignGui _PartDesign
+%define	plugins Complete Drawing Fem FreeCAD Image Import Inspection Mesh MeshPart Part Points QtUnit Raytracing ReverseEngineering Robot Sketcher Start Web PartDesignGui _PartDesign Spreadsheet SpreadsheetGui
 
 # Some plugins go in the Mod folder instead of lib. Deal with those here:
 %define	mod_plugins Mod/PartDesign
@@ -142,6 +143,7 @@ cd build
 	-DCMAKE_INSTALL_DATADIR=%{_datadir}/%{name} \
 	-DCMAKE_INSTALL_DOCDIR=%{_docdir}/%{name} \
 	-DCMAKE_INSTALL_INCLUDEDIR=%{_includedir} \
+	-DCMAKE_INSTALL_LIBDIR=%{_libdir}/%{name}/lib \
 	-DRESOURCEDIR=%{_datadir}/%{name} \
 	-DCOIN3D_INCLUDE_DIR=%{_includedir}/Coin2 \
 	-DCOIN3D_DOC_PATH=%{_datadir}/Coin2/Coin \
