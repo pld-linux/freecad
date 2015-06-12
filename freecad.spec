@@ -71,8 +71,8 @@ Requires:	glib2 >= 1:2.26.0
 Requires:	hicolor-icon-theme
 Requires:	python-collada
 Requires:	python-matplotlib
-Requires:	python-pivy
-Requires:	python-pyside
+Requires:	python-Pivy
+Requires:	python-PySide
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # Maintainers:  keep this list of plugins up to date
@@ -266,18 +266,22 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %doc ChangeLog.txt copying.lib data/License.txt
 %exclude %{_docdir}/freecad/freecad.*
-%attr(755,root,root) %{_bindir}/*
+%attr(755,root,root) %{_bindir}/FreeCAD
+%attr(755,root,root) %{_bindir}/FreeCADCmd
 %{_mandir}/man1/*.1*
 %{_datadir}/appdata/*.appdata.xml
 %{_desktopdir}/%{name}.desktop
 %{_iconsdir}/hicolor/scalable/apps/%{name}.svg
 %{_datadir}/mime/packages/%{name}.xml
 %dir %{_libdir}/%{name}
-%{_libdir}/%{name}/bin
-%{_libdir}/%{name}/lib
+%dir %{_libdir}/%{name}/bin
+%attr(755,root,root) %{_libdir}/%{name}/bin/*
+%dir %{_libdir}/%{name}/lib
+%attr(755,root,root) %{_libdir}/%{name}/lib/*.so
 %{_libdir}/%{name}/Mod
 
 %files data
 %defattr(644,root,root,755)
 %{_datadir}/%{name}/
+%dir %{_docdir}/%{name}
 %{_docdir}/%{name}/freecad.q*
