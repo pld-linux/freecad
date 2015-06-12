@@ -245,7 +245,7 @@ done
 appstream-util validate-relax --nonet $RPM_BUILD_ROOT/%{_datadir}/appdata/*.appdata.xml
 
 %post
-%update_icon_cache_post hicolor
+%update_icon_cache hicolor
 %update_desktop_database
 %update_mime_database
 
