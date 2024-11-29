@@ -1,28 +1,21 @@
 #
 # Conditional build:
 %bcond_with	occ		# Compile using OpenCASCADE instead of OCE
-%bcond_without	system_zipios 		# use system version of zipios++
-%bcond_without	system_pycxx	# use system version of pycxx
+%bcond_without	system_zipios	# use system version of zipios++
 %bcond_without	system_smesh	# use system version of Salome's Mesh
 
-# This revision is 0.15 final.
-%define	rev 4671
 Summary:	A general purpose 3D CAD modeler
-Name:		freecad
-Version:	0.15
+Name:		FreeCAD
+Version:	1.0.0
 Release:	0.1
-License:	GPL v2+
+License:	LGPL v2
 Group:		Applications/Engineering
-Source0:	http://downloads.sourceforge.net/free-cad/%{name}_%{version}.%{rev}.tar.gz
-# Source0-md5:	7afa95d3e8cd845bef83202e76db7f24
-Source101:	%{name}.desktop
-Source102:	%{name}.1
-Source103:	%{name}.appdata.xml
-Source104:	%{name}.sharedmimeinfo
-Patch0:		%{name}-3rdParty.patch
-Patch1:		%{name}-0.14-Xlib_h.patch
-Patch2:		%{name}-0.15-zipios.patch
-Patch3:		%{name}-0.14-Version_h.patch
+Source0:	https://github.com/FreeCAD/FreeCAD/releases/download/%{version}/freecad_source.tar.gz
+# Source0-md5:	6f0d75711b1d3b3ba35cb4e79c200c2d
+#Source101:	%{name}.desktop
+#Source102:	%{name}.1
+#Source103:	%{name}.appdata.xml
+#Source104:	%{name}.sharedmimeinfo
 URL:		http://freecadweb.org/
 # Utilities
 BuildRequires:	cmake
@@ -38,6 +31,7 @@ BuildRequires:	tbb-devel
 # Development Libraries
 BuildRequires:	FreeImage-devel
 BuildRequires:	Mesa-libGLU-devel
+BuildRequires:	PyCXX
 BuildRequires:	xorg-lib-libXmu-devel
 %if %{with occ}
 BuildRequires:	OpenCASCADE-devel
@@ -45,23 +39,35 @@ BuildRequires:	OpenCASCADE-devel
 BuildRequires:	OCE-devel
 %endif
 BuildRequires:	Coin-devel
-BuildRequires:	QtWebKit-devel
+BuildRequires:	Qt5Concurrent-devel
+BuildRequires:	Qt5Core-devel
+BuildRequires:	Qt5Network-devel
+BuildRequires:	Qt5OpenGL-devel
+BuildRequires:	Qt5PrintSupport-devel
+BuildRequires:	Qt5Svg-devel
+BuildRequires:	Qt5Test-devel
+BuildRequires:	Qt5UiTools-devel
+BuildRequires:	Qt5WebKit-devel
+BuildRequires:	Qt5Widgets-devel
+BuildRequires:	Qt5Xml-devel
 BuildRequires:	SoQt-devel
 BuildRequires:	appstream-glib-devel
 BuildRequires:	boost-devel
 BuildRequires:	eigen3
+BuildRequires:	ffmpeg-devel >= 6.0
+BuildRequires:	hdf5-c++-devel
 BuildRequires:	libicu-devel
 BuildRequires:	libspnav-devel
-BuildRequires:	netgen-mesher-devel
+BuildRequires:	netcdf-cxx-devel
+#BuildRequires:	netgen-mesher-devel
 #BuildRequires:  ode-devel
 #BuildRequires:  opencv-devel
-BuildRequires:	pyside-tools
-BuildRequires:	python-PySide-devel
+#BuildRequires:	pyside-tools
+#BuildRequires:	python-PySide-devel
 BuildRequires:	python-devel
 BuildRequires:	python-matplotlib
-%{?with_system_pycxx:BuildRequires:	python-pycxx-devel}
-BuildRequires:	qt-devel
-BuildRequires:	shiboken
+BuildRequires:	smesh-devel
+#BuildRequires:	shiboken
 BuildRequires:	xerces-c
 BuildRequires:	xerces-c-devel
 %{?with_system_zipios:BuildRequires:	zipios++-devel}
@@ -112,33 +118,12 @@ BuildArch:	noarch
 Data files for FreeCAD.
 
 %prep
-%setup -q -n %{name}-%{version}.%{rev}
-%patch0 -p1
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
-
-%if %{with system_pycxx}
-rm -r src/CXX
-%endif
-
-%if %{with system_zipios}
-rm -r src/zipios++
-%endif
-
-# Fix encodings
-dos2unix -k src/Mod/Test/unittestgui.py \
-	ChangeLog.txt \
-	copying.lib \
-	data/License.txt
-
-# Removed system libraries
-rm -r src/3rdParty
+%setup -q -c
 
 %build
 install -d build
 cd build
-%cmake \
+%cmake ../ \
 	-DCMAKE_INSTALL_PREFIX=%{_libdir}/%{name} \
 	-DCMAKE_INSTALL_DATADIR=%{_datadir}/%{name} \
 	-DCMAKE_INSTALL_DOCDIR=%{_docdir}/%{name} \
@@ -158,11 +143,7 @@ cd build
 %if %{with system_zipios}
 	-DFREECAD_USE_EXTERNAL_ZIPIOS=TRUE \
 %endif
-%if %{with system_pycxx}
-	-DPYCXX_INCLUDE_DIR=$(pkg-config --variable=includedir PyCXX) \
-	-DPYCXX_SOURCE_DIR=$(pkg-config --variable=srcdir PyCXX) \
-%endif
-	..
+	-DPYCXX_INCLUDE_DIR=%{_includedir}
 
 %{__make}
 %{__make} doc
