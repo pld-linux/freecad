@@ -1,8 +1,7 @@
 #
 # Conditional build:
 %bcond_with	occ		# Compile using OpenCASCADE instead of OCE
-%bcond_without	system_zipios	# use system version of zipios++
-%bcond_without	system_smesh	# use system version of Salome's Mesh
+%bcond_with	system_smesh	# use system version of Salome's Mesh
 
 Summary:	A general purpose 3D CAD modeler
 Name:		FreeCAD
@@ -63,22 +62,22 @@ BuildRequires:	netcdf-cxx-devel
 #BuildRequires:  ode-devel
 #BuildRequires:  opencv-devel
 #BuildRequires:	pyside-tools
-#BuildRequires:	python-PySide-devel
-BuildRequires:	python-devel
-BuildRequires:	python-matplotlib
+#BuildRequires:	python-PySide2-devel
+BuildRequires:	python3-devel
+BuildRequires:	python3-matplotlib
 BuildRequires:	smesh-devel
 #BuildRequires:	shiboken
 BuildRequires:	xerces-c
 BuildRequires:	xerces-c-devel
-%{?with_system_zipios:BuildRequires:	zipios++-devel}
+BuildRequires:	zipios++-devel
 Requires:	%{name}-data = %{version}-%{release}
 Requires:	glib2 >= 1:2.26.0
 # Needed for plugin support and is not a soname dependency.
 Requires:	hicolor-icon-theme
-Requires:	python-collada
-Requires:	python-matplotlib
-Requires:	python-Pivy
-Requires:	python-PySide
+Requires:	python3-collada
+Requires:	python3-matplotlib
+Requires:	python3-Pivy
+Requires:	python3-PySide2
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # Maintainers:  keep this list of plugins up to date
@@ -121,28 +120,26 @@ Data files for FreeCAD.
 %setup -q -c
 
 %build
+#	-DCMAKE_INSTALL_PREFIX=%{_libdir}/%{name} \
+#	-DCMAKE_INSTALL_DATADIR=%{_datadir}/%{name} \
+#	-DCMAKE_INSTALL_DOCDIR=%{_docdir}/%{name} \
+#	-DCMAKE_INSTALL_INCLUDEDIR=%{_includedir} \
+#	-DCMAKE_INSTALL_LIBDIR=%{_libdir}/%{name}/lib \
+#	-DRESOURCEDIR=%{_datadir}/%{name} \
+#	-DCOIN3D_INCLUDE_DIR=%{_includedir}/Coin2 \
+#	-DCOIN3D_DOC_PATH=%{_datadir}/Coin2/Coin \
+#	-DFREECAD_USE_EXTERNAL_PIVY=TRUE \
 install -d build
 cd build
 %cmake ../ \
-	-DCMAKE_INSTALL_PREFIX=%{_libdir}/%{name} \
-	-DCMAKE_INSTALL_DATADIR=%{_datadir}/%{name} \
-	-DCMAKE_INSTALL_DOCDIR=%{_docdir}/%{name} \
-	-DCMAKE_INSTALL_INCLUDEDIR=%{_includedir} \
-	-DCMAKE_INSTALL_LIBDIR=%{_libdir}/%{name}/lib \
-	-DRESOURCEDIR=%{_datadir}/%{name} \
-	-DCOIN3D_INCLUDE_DIR=%{_includedir}/Coin2 \
-	-DCOIN3D_DOC_PATH=%{_datadir}/Coin2/Coin \
-	-DFREECAD_USE_EXTERNAL_PIVY=TRUE \
 %if %{with occ}
-	-DUSE_OCC=TRUE \
+	-DFREECAD_USE_OCC_VARIANT="Community Edition" \
 %endif
 %if %{with system_smesh}
 	-DFREECAD_USE_EXTERNAL_SMESH=TRUE \
 	-DSMESH_INCLUDE_DIR=%{_includedir}/smesh \
 %endif
-%if %{with system_zipios}
 	-DFREECAD_USE_EXTERNAL_ZIPIOS=TRUE \
-%endif
 	-DPYCXX_INCLUDE_DIR=%{_includedir}
 
 %{__make}
