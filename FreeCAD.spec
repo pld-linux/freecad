@@ -1,6 +1,5 @@
 #
 # Conditional build:
-%bcond_with	occ		# Compile using OpenCASCADE instead of OCE
 %bcond_with	system_smesh	# use system version of Salome's Mesh
 
 Summary:	A general purpose 3D CAD modeler
@@ -32,11 +31,7 @@ BuildRequires:	FreeImage-devel
 BuildRequires:	Mesa-libGLU-devel
 BuildRequires:	PyCXX
 BuildRequires:	xorg-lib-libXmu-devel
-%if %{with occ}
 BuildRequires:	OpenCASCADE-devel
-%else
-BuildRequires:	OCE-devel
-%endif
 BuildRequires:	Coin-devel
 BuildRequires:	Qt5Concurrent-devel
 BuildRequires:	Qt5Core-devel
@@ -57,7 +52,8 @@ BuildRequires:	ffmpeg-devel >= 6.0
 BuildRequires:	hdf5-c++-devel
 BuildRequires:	libicu-devel
 BuildRequires:	libspnav-devel
-BuildRequires:	netcdf-cxx-devel
+BuildRequires:	med-devel
+BuildRequires:	netcdf-cxx4-devel
 #BuildRequires:	netgen-mesher-devel
 #BuildRequires:  ode-devel
 #BuildRequires:  opencv-devel
@@ -65,8 +61,8 @@ BuildRequires:	netcdf-cxx-devel
 #BuildRequires:	python-PySide2-devel
 BuildRequires:	python3-devel
 BuildRequires:	python3-matplotlib
-BuildRequires:	smesh-devel
 #BuildRequires:	shiboken
+BuildRequires:	vtk-devel
 BuildRequires:	xerces-c
 BuildRequires:	xerces-c-devel
 BuildRequires:	zipios++-devel
@@ -132,9 +128,6 @@ Data files for FreeCAD.
 install -d build
 cd build
 %cmake ../ \
-%if %{with occ}
-	-DFREECAD_USE_OCC_VARIANT="Community Edition" \
-%endif
 %if %{with system_smesh}
 	-DFREECAD_USE_EXTERNAL_SMESH=TRUE \
 	-DSMESH_INCLUDE_DIR=%{_includedir}/smesh \
