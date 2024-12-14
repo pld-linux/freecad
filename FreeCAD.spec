@@ -121,7 +121,7 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} -C build install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-%{__rm} $RPM_BUILD_ROOT%{_includedir}
+%{__rm} -r $RPM_BUILD_ROOT%{_includedir}
 
 %post
 %update_icon_cache hicolor
