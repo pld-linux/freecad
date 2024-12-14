@@ -1,6 +1,7 @@
 #
 # Conditional build:
 %bcond_with	system_smesh	# use system version of Salome's Mesh
+%bcond_with	system_zipios	# use system version of zipios++
 
 Summary:	A general purpose 3D CAD modeler
 Name:		FreeCAD
@@ -10,10 +11,6 @@ License:	LGPL v2
 Group:		Applications/Engineering
 Source0:	https://github.com/FreeCAD/FreeCAD/releases/download/%{version}/freecad_source.tar.gz
 # Source0-md5:	6f0d75711b1d3b3ba35cb4e79c200c2d
-#Source101:	%{name}.desktop
-#Source102:	%{name}.1
-#Source103:	%{name}.appdata.xml
-#Source104:	%{name}.sharedmimeinfo
 URL:		http://freecadweb.org/
 # Utilities
 BuildRequires:	cmake
@@ -65,7 +62,7 @@ BuildRequires:	python3-matplotlib
 BuildRequires:	vtk-devel
 BuildRequires:	xerces-c
 BuildRequires:	xerces-c-devel
-BuildRequires:	zipios++-devel
+%{?with_system_zipios:BuildRequires:	zipios++-devel}
 Requires:	%{name}-data = %{version}-%{release}
 Requires:	glib2 >= 1:2.26.0
 # Needed for plugin support and is not a soname dependency.
@@ -132,49 +129,15 @@ cd build
 	-DFREECAD_USE_EXTERNAL_SMESH=TRUE \
 	-DSMESH_INCLUDE_DIR=%{_includedir}/smesh \
 %endif
-	-DFREECAD_USE_EXTERNAL_ZIPIOS=TRUE \
+	%{cmake_on_off system_zipios FREECAD_USE_EXTERNAL_ZIPIOS} \
 	-DPYCXX_INCLUDE_DIR=%{_includedir}
 
 %{__make}
-%{__make} doc
 
 %install
 rm -rf $RPM_BUILD_ROOT
 %{__make} -C build install \
 	DESTDIR=$RPM_BUILD_ROOT
-
-# Symlink binaries to %{_bindir}
-install -d $RPM_BUILD_ROOT%{_bindir}
-ln -s ../%{_lib}/freecad/bin/FreeCAD $RPM_BUILD_ROOT%{_bindir}
-ln -s ../%{_lib}/freecad/bin/FreeCADCmd $RPM_BUILD_ROOT%{_bindir}
-
-# Fix problems with unittestgui.py
-#chmod +x $RPM_BUILD_ROOT%{_libdir}/%{name}/Mod/Test/unittestgui.py
-
-# Install desktop file
-desktop-file-install --dir=$RPM_BUILD_ROOT%{_desktopdir} %{SOURCE101}
-sed -i 's,@lib@,%{_lib},g' $RPM_BUILD_ROOT%{_desktopdir}/%{name}.desktop
-
-# Install desktop icon
-install -pD src/Gui/Icons/%{name}.svg $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/apps/%{name}.svg
-
-# Install man page
-install -pD %{SOURCE102} $RPM_BUILD_ROOT%{_mandir}/man1/%{name}.1
-
-# groff link manpage to other binary names
-echo %{name}.1 > $RPM_BUILD_ROOT%{_mandir}/man1/FreeCAD.1
-echo %{name}.1 > $RPM_BUILD_ROOT%{_mandir}/man1/FreeCADCmd.1
-
-# Remove obsolete Start_Page.html
-rm $RPM_BUILD_ROOT%{_docdir}/%{name}/Start_Page.html
-
-# Install MimeType file
-install -d $RPM_BUILD_ROOT%{_datadir}/mime/packages
-cp -p %{SOURCE104} $RPM_BUILD_ROOT%{_datadir}/mime/packages/%{name}.xml
-
-# Install appdata file
-install -d $RPM_BUILD_ROOT%{_datadir}/appdata
-cp -p %{SOURCE103} $RPM_BUILD_ROOT%{_datadir}/appdata/
 
 # Bug maintainers to keep %%{plugins} macro up to date.
 #
