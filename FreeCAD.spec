@@ -73,25 +73,6 @@ Requires:	python3-Pivy
 Requires:	python3-PySide2
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-# Maintainers:  keep this list of plugins up to date
-# List plugins in %%{_libdir}/freecad/lib, less '.so' and 'Gui.so', here
-%define	plugins Complete Drawing Fem FreeCAD Image Import Inspection Mesh MeshPart Part Points QtUnit Raytracing ReverseEngineering Robot Sketcher Start Web PartDesignGui _PartDesign Spreadsheet SpreadsheetGui
-
-# Some plugins go in the Mod folder instead of lib. Deal with those here:
-%define	mod_plugins Mod/PartDesign
-
-# plugins and private shared libs in %%{_libdir}/freecad/lib are private;
-# prevent private capabilities being advertised in Provides/Requires
-%define plugin_regexp /^\\\(libFreeCAD.*%(for i in %{plugins}; do echo -n "\\\|$i\\\|$iGui"; done)\\\)\\\(\\\|Gui\\\)\\.so/d
-%{?filter_setup:
-%filter_provides_in %{_libdir}/%{name}/lib
-%filter_from_requires %{plugin_regexp}
-%filter_from_provides %{plugin_regexp}
-%filter_provides_in %{_libdir}/%{name}/Mod
-%filter_requires_in %{_libdir}/%{name}/Mod
-%filter_setup
-}
-
 %description
 FreeCAD is a general purpose Open Source 3D CAD/MCAD/CAx/CAE/PLM
 modeler, aimed directly at mechanical engineering and product design
@@ -113,20 +94,21 @@ Data files for FreeCAD.
 %setup -q -c
 
 %build
-#	-DCMAKE_INSTALL_PREFIX=%{_libdir}/%{name} \
-#	-DCMAKE_INSTALL_DATADIR=%{_datadir}/%{name} \
-#	-DCMAKE_INSTALL_DOCDIR=%{_docdir}/%{name} \
-#	-DCMAKE_INSTALL_INCLUDEDIR=%{_includedir} \
-#	-DCMAKE_INSTALL_LIBDIR=%{_libdir}/%{name}/lib \
-#	-DRESOURCEDIR=%{_datadir}/%{name} \
-#	-DCOIN3D_INCLUDE_DIR=%{_includedir}/Coin2 \
-#	-DCOIN3D_DOC_PATH=%{_datadir}/Coin2/Coin \
 #	-DFREECAD_USE_EXTERNAL_PIVY=TRUE \
 install -d build
 cd build
 %cmake ../ \
+	-DCMAKE_INSTALL_PREFIX=%{_libdir}/%{name} \
+	-DCMAKE_INSTALL_DATADIR=%{_datadir}/%{name} \
+	-DCMAKE_INSTALL_DOCDIR=%{_docdir}/%{name} \
+	-DCMAKE_INSTALL_INCLUDEDIR=%{_includedir} \
+	-DCMAKE_INSTALL_LIBDIR=%{_libdir}/%{name}/lib \
+	-DRESOURCEDIR=%{_datadir}/%{name} \
+	-DCOIN3D_INCLUDE_DIR=%{_includedir}/Coin2 \
+	-DCOIN3D_DOC_PATH=%{_datadir}/Coin2/Coin \
+	-DENABLE_DEVELOPER_TESTS=OFF \
 %if %{with system_smesh}
-	-DFREECAD_USE_EXTERNAL_SMESH=TRUE \
+	-DFREECAD_USE_EXTERNAL_SMESH=ON \
 	-DSMESH_INCLUDE_DIR=%{_includedir}/smesh \
 %endif
 	%{cmake_on_off system_zipios FREECAD_USE_EXTERNAL_ZIPIOS} \
@@ -139,44 +121,7 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} -C build install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-# Bug maintainers to keep %%{plugins} macro up to date.
-#
-# Make sure there are no plugins that need to be added to plugins macro
-new_plugins=$(ls $RPM_BUILD_ROOT%{_libdir}/freecad/lib | sed -e '%{plugin_regexp}')
-if [ -n "$new_plugins" ]; then
-	cat >&2 <<-EOF
-	**** ERROR:
-
-	Plugins not caught by regexp: $new_plugins
-
-	Plugins in %{_libdir}/freecad/lib do not exist in
-	specfile %%{plugins} macro. Please add these to
-	%%{plugins} macro at top of specfile and rebuild.
-
-	****
-	EOF
-	exit 1
-fi
-
-# Make sure there are no entries in the plugins macro that don't match plugins
-for p in %{plugins}; do
-	if [ -z "$(ls $RPM_BUILD_ROOT%{_libdir}/freecad/lib/$p*.so)" ]; then
-		set +x
-		cat >&2 <<-EOF
-			**** ERROR:
-
-			Extra entry in %%{plugins} macro with no matching plugin:
-			'$p'
-
-			Please remove from %%{plugins} macro at top of specfile and rebuild.
-
-			****
-		EOF
-		exit 1
-	fi
-done
-
-appstream-util validate-relax --nonet $RPM_BUILD_ROOT/%{_datadir}/appdata/*.appdata.xml
+%{__rm} $RPM_BUILD_ROOT%{_includedir}
 
 %post
 %update_icon_cache hicolor
@@ -198,24 +143,20 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc ChangeLog.txt copying.lib data/License.txt
+%doc README.md SECURITY.md
 %exclude %{_docdir}/freecad/freecad.*
 %attr(755,root,root) %{_bindir}/FreeCAD
 %attr(755,root,root) %{_bindir}/FreeCADCmd
-%{_mandir}/man1/*.1*
-%{_datadir}/appdata/*.appdata.xml
-%{_desktopdir}/%{name}.desktop
-%{_iconsdir}/hicolor/scalable/apps/%{name}.svg
-%{_datadir}/mime/packages/%{name}.xml
+%{_datadir}/metainfo/*.xml
+%{_desktopdir}/*.desktop
+%{_iconsdir}/hicolor/*x*/apps/*.png
+%{_datadir}/mime/packages/*.xml
 %dir %{_libdir}/%{name}
-%dir %{_libdir}/%{name}/bin
-%attr(755,root,root) %{_libdir}/%{name}/bin/*
 %dir %{_libdir}/%{name}/lib
 %attr(755,root,root) %{_libdir}/%{name}/lib/*.so
+%attr(755,root,root) %{_libdir}/%{name}/lib/libOndselSolver.so.*
 %{_libdir}/%{name}/Mod
 
 %files data
 %defattr(644,root,root,755)
-%{_datadir}/%{name}/
-%dir %{_docdir}/%{name}
-%{_docdir}/%{name}/freecad.q*
+%{_datadir}/%{name}
