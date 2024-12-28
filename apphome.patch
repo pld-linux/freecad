@@ -1,0 +1,27 @@
+--- FreeCAD-1.0.0/src/App/Application.cpp~	2024-11-18 19:38:15.000000000 +0100
++++ FreeCAD-1.0.0/src/App/Application.cpp	2024-12-28 23:34:27.863331562 +0100
+@@ -2530,7 +2530,11 @@
+ void Application::initConfig(int argc, char ** argv)
+ {
+     // find the home path....
++#ifdef APPHOMEPATH
++    mConfig["AppHomePath"] = APPHOMEPATH;
++#else
+     mConfig["AppHomePath"] = FindHomePath(argv[0]);
++#endif
+ 
+     // Version of the application extracted from SubWCRef into src/Build/Version.h
+     // We only set these keys if not yet defined. Therefore it suffices to search
+--- FreeCAD-1.0.0/src/App/CMakeLists.txt~	2024-11-18 19:38:15.000000000 +0100
++++ FreeCAD-1.0.0/src/App/CMakeLists.txt	2024-12-28 23:35:12.736664896 +0100
+@@ -20,6 +20,10 @@
+     add_definitions(-DDOCDIR="${DOCDIR}")
+ ENDIF(DOCDIR)
+ 
++IF(APPHOMEPATH)
++	add_definitions(-DAPPHOMEPATH="${APPHOMEPATH}/")
++ENDIF(APPHOMEPATH)
++
+ #if you want to use the old DAG structure uncomment this line
+ #add_definitions(-DUSE_OLD_DAG)
+ 

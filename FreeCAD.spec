@@ -11,6 +11,7 @@ License:	LGPL v2
 Group:		Applications/Engineering
 Source0:	https://github.com/FreeCAD/FreeCAD/releases/download/%{version}/freecad_source.tar.gz
 # Source0-md5:	6f0d75711b1d3b3ba35cb4e79c200c2d
+Patch0:		apphome.patch
 URL:		http://freecadweb.org/
 # Utilities
 BuildRequires:	cmake
@@ -24,14 +25,14 @@ BuildRequires:	graphviz
 BuildRequires:	swig
 BuildRequires:	tbb-devel
 # Development Libraries
+BuildRequires:	Coin-devel
 BuildRequires:	FreeImage-devel
 BuildRequires:	Mesa-libGLU-devel
-BuildRequires:	PyCXX
-BuildRequires:	xorg-lib-libXmu-devel
 BuildRequires:	OpenCASCADE-devel
-BuildRequires:	Coin-devel
+BuildRequires:	PyCXX
 BuildRequires:	Qt5Concurrent-devel
 BuildRequires:	Qt5Core-devel
+BuildRequires:	Qt5Designer-devel
 BuildRequires:	Qt5Network-devel
 BuildRequires:	Qt5OpenGL-devel
 BuildRequires:	Qt5PrintSupport-devel
@@ -51,26 +52,27 @@ BuildRequires:	libicu-devel
 BuildRequires:	libspnav-devel
 BuildRequires:	med-devel
 BuildRequires:	netcdf-cxx4-devel
-#BuildRequires:	netgen-mesher-devel
-#BuildRequires:  ode-devel
+BuildRequires:	netgen-mesher-devel
+# not needed at the moment
 #BuildRequires:  opencv-devel
 #BuildRequires:	pyside-tools
-#BuildRequires:	python-PySide2-devel
+#BuildRequires:	python3-PySide2-devel
 BuildRequires:	python3-devel
 BuildRequires:	python3-matplotlib
 #BuildRequires:	shiboken
 BuildRequires:	vtk-devel
 BuildRequires:	xerces-c
 BuildRequires:	xerces-c-devel
+BuildRequires:	xorg-lib-libXmu-devel
 %{?with_system_zipios:BuildRequires:	zipios++-devel}
 Requires:	%{name}-data = %{version}-%{release}
 Requires:	glib2 >= 1:2.26.0
 # Needed for plugin support and is not a soname dependency.
 Requires:	hicolor-icon-theme
-Requires:	python3-collada
-Requires:	python3-matplotlib
 Requires:	python3-Pivy
 Requires:	python3-PySide2
+Requires:	python3-collada
+Requires:	python3-matplotlib
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -92,6 +94,7 @@ Data files for FreeCAD.
 
 %prep
 %setup -q -c
+%patch -P 0 -p1
 
 %build
 #	-DFREECAD_USE_EXTERNAL_PIVY=TRUE \
@@ -103,16 +106,19 @@ cd build
 	-DCMAKE_INSTALL_DOCDIR=%{_docdir}/%{name} \
 	-DCMAKE_INSTALL_INCLUDEDIR=%{_includedir} \
 	-DCMAKE_INSTALL_LIBDIR=%{_libdir}/%{name}/lib \
+	-DAPPHOMEPATH=%{_libdir}/%{name} \
+	-DLIBRARYDIR=%{_libdir}/%{name}/lib \
 	-DRESOURCEDIR=%{_datadir}/%{name} \
 	-DCOIN3D_INCLUDE_DIR=%{_includedir}/Coin2 \
 	-DCOIN3D_DOC_PATH=%{_datadir}/Coin2/Coin \
 	-DENABLE_DEVELOPER_TESTS=OFF \
+	-DBUILD_DESIGNER_PLUGIN=ON \
+	-DBUILD_FEM_NETGEN=ON \
 %if %{with system_smesh}
 	-DFREECAD_USE_EXTERNAL_SMESH=ON \
 	-DSMESH_INCLUDE_DIR=%{_includedir}/smesh \
 %endif
-	%{cmake_on_off system_zipios FREECAD_USE_EXTERNAL_ZIPIOS} \
-	-DPYCXX_INCLUDE_DIR=%{_includedir}
+	%{cmake_on_off system_zipios FREECAD_USE_EXTERNAL_ZIPIOS}
 
 %{__make}
 
@@ -149,13 +155,18 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/FreeCADCmd
 %{_datadir}/metainfo/*.xml
 %{_desktopdir}/*.desktop
-%{_iconsdir}/hicolor/*x*/apps/*.png
+%{_iconsdir}/hicolor/*x*/apps/org.freecad.FreeCAD.png
+%{_iconsdir}/hicolor/scalable/apps/org.freecad.FreeCAD.svg
+%{_iconsdir}/hicolor/scalable/mimetypes/application-x-extension-fcstd.svg
+%{_pixmapsdir}/freecad.xpm
 %{_datadir}/mime/packages/*.xml
 %dir %{_libdir}/%{name}
+%{_libdir}/%{name}/Ext
+%{_libdir}/%{name}/Mod
 %dir %{_libdir}/%{name}/lib
 %attr(755,root,root) %{_libdir}/%{name}/lib/*.so
 %attr(755,root,root) %{_libdir}/%{name}/lib/libOndselSolver.so.*
-%{_libdir}/%{name}/Mod
+%{py3_sitescriptdir}/freecad/UiTools.py
 
 %files data
 %defattr(644,root,root,755)
