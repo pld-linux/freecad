@@ -30,18 +30,18 @@ BuildRequires:	FreeImage-devel
 BuildRequires:	Mesa-libGLU-devel
 BuildRequires:	OpenCASCADE-devel
 BuildRequires:	PyCXX
-BuildRequires:	Qt5Concurrent-devel
-BuildRequires:	Qt5Core-devel
-BuildRequires:	Qt5Designer-devel
-BuildRequires:	Qt5Network-devel
-BuildRequires:	Qt5OpenGL-devel
-BuildRequires:	Qt5PrintSupport-devel
-BuildRequires:	Qt5Svg-devel
-BuildRequires:	Qt5Test-devel
-BuildRequires:	Qt5UiTools-devel
-BuildRequires:	Qt5WebKit-devel
-BuildRequires:	Qt5Widgets-devel
-BuildRequires:	Qt5Xml-devel
+BuildRequires:	Qt6Concurrent-devel
+BuildRequires:	Qt6Core-devel
+BuildRequires:	Qt6Designer-devel
+BuildRequires:	Qt6Network-devel
+BuildRequires:	Qt6OpenGL-devel
+BuildRequires:	Qt6PrintSupport-devel
+BuildRequires:	Qt6Svg-devel
+BuildRequires:	Qt6Test-devel
+BuildRequires:	Qt6UiTools-devel
+BuildRequires:	Qt6WebEngine-devel
+BuildRequires:	Qt6Widgets-devel
+BuildRequires:	Qt6Xml-devel
 BuildRequires:	SoQt-devel
 BuildRequires:	appstream-glib-devel
 BuildRequires:	boost-devel
@@ -56,10 +56,10 @@ BuildRequires:	netgen-mesher-devel
 # not needed at the moment
 #BuildRequires:  opencv-devel
 #BuildRequires:	pyside-tools
-#BuildRequires:	python3-PySide2-devel
+#BuildRequires:	python3-PySide6-devel
 BuildRequires:	python3-devel
 BuildRequires:	python3-matplotlib
-#BuildRequires:	shiboken
+#BuildRequires:	shiboken6
 BuildRequires:	vtk-devel
 BuildRequires:	xerces-c
 BuildRequires:	xerces-c-devel
@@ -70,7 +70,7 @@ Requires:	glib2 >= 1:2.26.0
 # Needed for plugin support and is not a soname dependency.
 Requires:	hicolor-icon-theme
 Requires:	python3-Pivy
-Requires:	python3-PySide2
+Requires:	python3-PySide6
 Requires:	python3-collada
 Requires:	python3-matplotlib
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -114,6 +114,8 @@ cd build
 	-DENABLE_DEVELOPER_TESTS=OFF \
 	-DBUILD_DESIGNER_PLUGIN=ON \
 	-DBUILD_FEM_NETGEN=ON \
+	-DFREECAD_QT_MAJOR_VERSION=6 \
+	-DQT_DEFAULT_MAJOR_VERSION=6 \
 %if %{with system_smesh}
 	-DFREECAD_USE_EXTERNAL_SMESH=ON \
 	-DSMESH_INCLUDE_DIR=%{_includedir}/smesh \
