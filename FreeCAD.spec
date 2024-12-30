@@ -44,7 +44,7 @@ BuildRequires:	Qt6Widgets-devel
 BuildRequires:	Qt6Xml-devel
 BuildRequires:	SoQt-devel
 BuildRequires:	appstream-glib-devel
-BuildRequires:	boost-devel
+BuildRequires:	boost-devel >= 1:1.85.0
 BuildRequires:	eigen3
 BuildRequires:	ffmpeg-devel >= 6.0
 BuildRequires:	hdf5-c++-devel
@@ -55,11 +55,12 @@ BuildRequires:	netcdf-cxx4-devel
 BuildRequires:	netgen-mesher-devel
 # not needed at the moment
 #BuildRequires:  opencv-devel
-#BuildRequires:	pyside-tools
-#BuildRequires:	python3-PySide6-devel
+BuildRequires:	python3-PySide6
 BuildRequires:	python3-devel
 BuildRequires:	python3-matplotlib
-#BuildRequires:	shiboken6
+BuildRequires:	python3-pivy
+BuildRequires:	python3-pivy-gui
+BuildRequires:	shiboken6
 BuildRequires:	vtk-devel
 BuildRequires:	xerces-c
 BuildRequires:	xerces-c-devel
@@ -69,10 +70,10 @@ Requires:	%{name}-data = %{version}-%{release}
 Requires:	glib2 >= 1:2.26.0
 # Needed for plugin support and is not a soname dependency.
 Requires:	hicolor-icon-theme
-Requires:	python3-Pivy
 Requires:	python3-PySide6
-Requires:	python3-collada
 Requires:	python3-matplotlib
+Requires:	python3-pivy
+Requires:	python3-pivy-gui
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -109,8 +110,6 @@ cd build
 	-DAPPHOMEPATH=%{_libdir}/%{name} \
 	-DLIBRARYDIR=%{_libdir}/%{name}/lib \
 	-DRESOURCEDIR=%{_datadir}/%{name} \
-	-DCOIN3D_INCLUDE_DIR=%{_includedir}/Coin2 \
-	-DCOIN3D_DOC_PATH=%{_datadir}/Coin2/Coin \
 	-DENABLE_DEVELOPER_TESTS=OFF \
 	-DBUILD_DESIGNER_PLUGIN=ON \
 	-DBUILD_FEM_NETGEN=ON \
@@ -129,7 +128,11 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} -C build install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-%{__rm} -r $RPM_BUILD_ROOT%{_includedir}
+%py3_ocomp $RPM_BUILD_ROOT{py3_sitescriptdir}
+
+%{__rm} -r $RPM_BUILD_ROOT{%{_includedir},%{_npkgconfigdir}}
+%{__rm} -r $RPM_BUILD_ROOT%{_libdir}/FreeCAD/include
+%{__rm} -r $RPM_BUILD_ROOT%{_docdir}/FreeCAD
 
 %post
 %update_icon_cache hicolor
@@ -152,7 +155,8 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc README.md SECURITY.md
-%exclude %{_docdir}/freecad/freecad.*
+%doc build/usr/share/doc/FreeCAD/LICENSE.html
+%doc build/usr/share/doc/FreeCAD/ThirdPartyLibraries.html
 %attr(755,root,root) %{_bindir}/FreeCAD
 %attr(755,root,root) %{_bindir}/FreeCADCmd
 %{_datadir}/metainfo/*.xml
@@ -168,7 +172,8 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_libdir}/%{name}/lib
 %attr(755,root,root) %{_libdir}/%{name}/lib/*.so
 %attr(755,root,root) %{_libdir}/%{name}/lib/libOndselSolver.so.*
-%{py3_sitescriptdir}/freecad/UiTools.py
+%{py3_sitescriptdir}/freecad
+%{_datadir}/thumbnailers/FreeCAD.thumbnailer
 
 %files data
 %defattr(644,root,root,755)
