@@ -74,6 +74,7 @@ Requires:	python3-PySide6
 Requires:	python3-matplotlib
 Requires:	python3-pivy
 Requires:	python3-pivy-gui
+ExcludeArch:	%{ix86} x32
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
