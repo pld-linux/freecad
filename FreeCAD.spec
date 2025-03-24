@@ -6,7 +6,7 @@
 Summary:	A general purpose 3D CAD modeler
 Name:		FreeCAD
 Version:	1.0.0
-Release:	3
+Release:	4
 License:	LGPL v2
 Group:		Applications/Engineering
 Source0:	https://github.com/FreeCAD/FreeCAD/releases/download/%{version}/freecad_source.tar.gz
