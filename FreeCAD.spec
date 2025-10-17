@@ -5,25 +5,29 @@
 
 Summary:	A general purpose 3D CAD modeler
 Name:		FreeCAD
-Version:	1.0.0
-Release:	4
+Version:	1.0.2
+Release:	1
 License:	LGPL v2
 Group:		Applications/Engineering
 Source0:	https://github.com/FreeCAD/FreeCAD/releases/download/%{version}/freecad_source.tar.gz
-# Source0-md5:	6f0d75711b1d3b3ba35cb4e79c200c2d
+# Source0-md5:	40f9fbe04f30954b3e9ae12b2ae322c3
 Patch0:		apphome.patch
 URL:		http://freecadweb.org/
 # Utilities
+BuildRequires:	boost-python-devel-common
+BuildRequires:	boost-python3-devel
 BuildRequires:	cmake
 BuildRequires:	desktop-file-utils
 BuildRequires:	dos2unix
 BuildRequires:	doxygen
+BuildRequires:	draco-devel
 BuildRequires:	gcc-fortran
 BuildRequires:	gettext
 BuildRequires:	graphviz
 %{?with_system_smesh:BuildRequires:  smesh-devel}
 BuildRequires:	swig
 BuildRequires:	tbb-devel
+BuildRequires:	yaml-cpp-devel
 # Development Libraries
 BuildRequires:	Coin-devel
 BuildRequires:	FreeImage-devel
@@ -96,7 +100,7 @@ Data files for FreeCAD.
 
 %prep
 %setup -q -c
-%patch -P 0 -p1
+%patch -P0 -p1
 
 %build
 #	-DFREECAD_USE_EXTERNAL_PIVY=TRUE \
@@ -171,8 +175,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/%{name}/Ext
 %{_libdir}/%{name}/Mod
 %dir %{_libdir}/%{name}/lib
-%attr(755,root,root) %{_libdir}/%{name}/lib/*.so
-%attr(755,root,root) %{_libdir}/%{name}/lib/libOndselSolver.so.*
+%{_libdir}/%{name}/lib/*.so
+%{_libdir}/%{name}/lib/libOndselSolver.so.*
 %{py3_sitescriptdir}/freecad
 %{_datadir}/thumbnailers/FreeCAD.thumbnailer
 
