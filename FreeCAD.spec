@@ -5,14 +5,15 @@
 
 Summary:	A general purpose 3D CAD modeler
 Name:		FreeCAD
-Version:	1.0.2
-Release:	2
+Version:	1.1.1
+Release:	1
 License:	LGPL v2
 Group:		Applications/Engineering
-Source0:	https://github.com/FreeCAD/FreeCAD/releases/download/%{version}/freecad_source.tar.gz
-# Source0-md5:	40f9fbe04f30954b3e9ae12b2ae322c3
+Source0:	https://github.com/FreeCAD/FreeCAD/releases/download/%{version}/freecad_source_%{version}.tar.gz
+# Source0-md5:	c1c548aebc1b65a2f9925b253fea1394
 Patch0:		apphome.patch
-URL:		http://freecadweb.org/
+Patch1:		external-E57Format.patch
+URL:		https://freecad.org/
 # Utilities
 BuildRequires:	boost-python-devel-common
 BuildRequires:	boost-python3-devel
@@ -24,6 +25,7 @@ BuildRequires:	draco-devel
 BuildRequires:	gcc-fortran
 BuildRequires:	gettext
 BuildRequires:	graphviz
+BuildRequires:	libE57Format-devel
 %{?with_system_smesh:BuildRequires:  smesh-devel}
 BuildRequires:	swig
 BuildRequires:	tbb-devel
@@ -66,6 +68,7 @@ BuildRequires:	python3-pivy
 BuildRequires:	python3-pivy-gui
 BuildRequires:	shiboken6
 BuildRequires:	vtk-devel
+BuildRequires:	vtk-python3-devel
 BuildRequires:	xerces-c
 BuildRequires:	xerces-c-devel
 BuildRequires:	xorg-lib-libXmu-devel
@@ -98,9 +101,20 @@ BuildArch:	noarch
 %description data
 Data files for FreeCAD.
 
+%package -n Qt6Designer-plugin-%{name}
+Summary:	FreeCad plugin for Qt Designer
+Group:		X11/Development/Libraries
+Requires:	%{name} = %{version}-%{release}
+Requires:	Qt6Designer >= 6
+
+%description -n Qt6Designer-plugin-%{name}
+FreeCAD plugin for Qt Designer that allows FreeCAD instances to
+be included in GUI designs just like any other Qt widget.
+
 %prep
 %setup -q -c
 %patch -P0 -p1
+%patch -P1 -p1
 
 %build
 #	-DFREECAD_USE_EXTERNAL_PIVY=TRUE \
@@ -120,6 +134,7 @@ cd build
 	-DBUILD_FEM_NETGEN=ON \
 	-DFREECAD_QT_MAJOR_VERSION=6 \
 	-DQT_DEFAULT_MAJOR_VERSION=6 \
+	-DFREECAD_USE_EXTERNAL_E57FORMAT=ON \
 %if %{with system_smesh}
 	-DFREECAD_USE_EXTERNAL_SMESH=ON \
 	-DSMESH_INCLUDE_DIR=%{_includedir}/smesh \
@@ -136,7 +151,6 @@ rm -rf $RPM_BUILD_ROOT
 %py3_ocomp $RPM_BUILD_ROOT{py3_sitescriptdir}
 
 %{__rm} -r $RPM_BUILD_ROOT{%{_includedir},%{_npkgconfigdir}}
-%{__rm} -r $RPM_BUILD_ROOT%{_libdir}/FreeCAD/include
 %{__rm} -r $RPM_BUILD_ROOT%{_docdir}/FreeCAD
 
 %post
@@ -164,12 +178,13 @@ rm -rf $RPM_BUILD_ROOT
 %doc build/usr/share/doc/FreeCAD/ThirdPartyLibraries.html
 %attr(755,root,root) %{_bindir}/FreeCAD
 %attr(755,root,root) %{_bindir}/FreeCADCmd
+%attr(755,root,root) %{_bindir}/freecad-thumbnailer
 %{_datadir}/metainfo/*.xml
 %{_desktopdir}/*.desktop
 %{_iconsdir}/hicolor/*x*/apps/org.freecad.FreeCAD.png
 %{_iconsdir}/hicolor/scalable/apps/org.freecad.FreeCAD.svg
 %{_iconsdir}/hicolor/scalable/mimetypes/application-x-extension-fcstd.svg
-%{_pixmapsdir}/freecad.xpm
+%{_pixmapsdir}/freecad.svg
 %{_datadir}/mime/packages/*.xml
 %dir %{_libdir}/%{name}
 %{_libdir}/%{name}/Ext
@@ -183,3 +198,6 @@ rm -rf $RPM_BUILD_ROOT
 %files data
 %defattr(644,root,root,755)
 %{_datadir}/%{name}
+
+%files -n Qt6Designer-plugin-%{name}
+%{_libdir}/qt6/plugins/designer/libFreeCAD_widgets.so

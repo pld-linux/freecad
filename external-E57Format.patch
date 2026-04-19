@@ -1,0 +1,12 @@
+--- FreeCAD-1.1.1/CMakeLists.txt~	2026-04-15 00:54:18.000000000 +0200
++++ FreeCAD-1.1.1/CMakeLists.txt	2026-04-19 12:53:07.430004402 +0200
+@@ -105,6 +105,9 @@
+     # If these macro definitions are embedded within another macro, it causes problems.
+     include(cMake/FreeCAD_Helpers/SetupQt.cmake)
+     SetupFreetype()
++    if (FREECAD_USE_EXTERNAL_E57FORMAT)
++        find_package(E57Format)
++    endif(FREECAD_USE_EXTERNAL_E57FORMAT)
+ 
+     if(BUILD_GUI)
+         SetupCoin3D()

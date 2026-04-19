@@ -1,13 +1,15 @@
 --- FreeCAD-1.0.0/src/App/Application.cpp~	2024-11-18 19:38:15.000000000 +0100
 +++ FreeCAD-1.0.0/src/App/Application.cpp	2024-12-28 23:34:27.863331562 +0100
-@@ -2530,7 +2530,11 @@
+@@ -2512,9 +2512,13 @@
  void Application::initConfig(int argc, char ** argv)
  {
      // find the home path....
 +#ifdef APPHOMEPATH
 +    mConfig["AppHomePath"] = APPHOMEPATH;
 +#else
-     mConfig["AppHomePath"] = FindHomePath(argv[0]);
+     mConfig["AppHomePath"] = Base::FileInfo::pathToString(
+         ApplicationDirectories::findHomePath(argv[0])
+     );
 +#endif
  
      // Version of the application extracted from SubWCRef into src/Build/Version.h
@@ -22,6 +24,6 @@
 +	add_definitions(-DAPPHOMEPATH="${APPHOMEPATH}/")
 +ENDIF(APPHOMEPATH)
 +
- #if you want to use the old DAG structure uncomment this line
- #add_definitions(-DUSE_OLD_DAG)
+ # -----------------------------------------------------------------------------
  
+ #write relevant cmake variables to a file for later access with python. Exported are all variables
