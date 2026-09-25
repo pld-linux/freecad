@@ -1,7 +1,7 @@
 #
 # Conditional build:
-%bcond_with	system_smesh	# use system version of Salome's Mesh
-%bcond_with	system_zipios	# use system version of zipios++
+%bcond_with	system_smesh	# system version of Salome's Mesh
+%bcond_with	system_zipios	# system version of zipios++
 
 Summary:	A general purpose 3D CAD modeler
 Name:		FreeCAD
@@ -13,6 +13,7 @@ Source0:	https://github.com/FreeCAD/FreeCAD/releases/download/%{version}/freecad
 # Source0-md5:	355c28ccdabc1afedc9adbc247c490bf
 Patch0:		apphome.patch
 Patch1:		external-E57Format.patch
+Patch2:		FreeCAD-netgen.patch
 URL:		https://freecad.org/
 # Utilities
 BuildRequires:	boost-python-devel-common
@@ -66,6 +67,7 @@ BuildRequires:	python3-devel
 BuildRequires:	python3-matplotlib
 BuildRequires:	python3-pivy
 BuildRequires:	python3-pivy-gui
+BuildRequires:	qt6-linguist
 BuildRequires:	shiboken6
 BuildRequires:	vtk-devel
 BuildRequires:	vtk-python3-devel
@@ -115,6 +117,10 @@ be included in GUI designs just like any other Qt widget.
 %setup -q -c
 %patch -P0 -p1
 %patch -P1 -p1
+%patch -P2 -p1
+
+# don't force color diagnostics if output is not terminal
+%{__sed} -i -e 's/-fdiagnostics-color //' cMake/FreeCAD_Helpers/CompilerChecksAndSetups.cmake
 
 %build
 #	-DFREECAD_USE_EXTERNAL_PIVY=TRUE \

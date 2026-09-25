@@ -1,0 +1,299 @@
+--- FreeCAD-1.1.3/src/3rdParty/salomesmesh/src/NETGENPlugin/NETGENPlugin_Mesher.cpp.orig	2026-07-25 06:56:12.000000000 +0200
++++ FreeCAD-1.1.3/src/3rdParty/salomesmesh/src/NETGENPlugin/NETGENPlugin_Mesher.cpp	2026-09-25 20:09:55.515741854 +0200
+@@ -917,54 +917,54 @@ bool NETGENPlugin_Mesher::FillNgMesh(net
+           seg[0] = prevNgId;
+           seg[1] = prevNgId = ngNodeId( p2.node, ngMesh, nodeNgIdMap );
+           // node param on curve
+-          seg.epgeominfo[ 0 ].dist = p1.param;
+-          seg.epgeominfo[ 1 ].dist = p2.param;
++          seg.EPGeomInfo(0).dist = p1.param;
++          seg.EPGeomInfo(1).dist = p2.param;
+           // uv on face
+-          seg.epgeominfo[ 0 ].u = p1.u;
+-          seg.epgeominfo[ 0 ].v = p1.v;
+-          seg.epgeominfo[ 1 ].u = p2.u;
+-          seg.epgeominfo[ 1 ].v = p2.v;
++          seg.GeomInfo(0).u = p1.u;
++          seg.GeomInfo(0).v = p1.v;
++          seg.GeomInfo(1).u = p2.u;
++          seg.GeomInfo(1).v = p2.v;
+ 
+           //geomEdge = fSide.Edge( fSide.EdgeIndex( 0.5 * ( p1.normParam + p2.normParam )));
+-          //seg.epgeominfo[ 0 ].edgenr = seg.epgeominfo[ 1 ].edgenr = occgeom.emap.FindIndex( geomEdge );
++          //seg.GeomInfo(0).trignum = seg.GeomInfo(1).trignum = occgeom.emap.FindIndex( geomEdge );
+ 
+-          //seg.epgeominfo[ iEnd ].edgenr = edgeID; //  = geom.emap.FindIndex(edge);
+-          seg.si = faceNgID;                   // = geom.fmap.FindIndex (face);
+-          seg.edgenr = ngMesh.GetNSeg() + 1; // segment id
++          //seg.GeomInfo(iEnd).trignum = edgeID; //  = geom.emap.FindIndex(edge);
++          seg.SetIndex(faceNgID);                   // = geom.fmap.FindIndex (face);
++          seg.SetHpElnr(ngMesh.GetNSeg() + 1); // segment id
+           ngMesh.AddSegment (seg);
+ 
+           SMESH_TNodeXYZ np1( p1.node ), np2( p2.node );
+           RestrictLocalSize( ngMesh, 0.5*(np1+np2), (np1-np2).Modulus() );
+ 
+ #ifdef DUMP_SEGMENTS
+-          cout << "Segment: " << seg.edgenr << " on SMESH face " << helper.GetMeshDS()->ShapeToIndex( face ) << std::endl
+-               << "\tface index: " << seg.si << std::endl
++          cout << "Segment: " << seg.GetHpElnr() << " on SMESH face " << helper.GetMeshDS()->ShapeToIndex( face ) << std::endl
++               << "\tface index: " << seg.GetIndex() << std::endl
+                << "\tp1: " << seg[0] << std::endl
+                << "\tp2: " << seg[1] << std::endl
+-               << "\tp0 param: " << seg.epgeominfo[ 0 ].dist << std::endl
+-               << "\tp0 uv: " << seg.epgeominfo[ 0 ].u <<", "<< seg.epgeominfo[ 0 ].v << std::endl
+-            //<< "\tp0 edge: " << seg.epgeominfo[ 0 ].edgenr << std::endl
+-               << "\tp1 param: " << seg.epgeominfo[ 1 ].dist << std::endl
+-               << "\tp1 uv: " << seg.epgeominfo[ 1 ].u <<", "<< seg.epgeominfo[ 1 ].v << std::endl;
+-            //<< "\tp1 edge: " << seg.epgeominfo[ 1 ].edgenr << std::endl;
++               << "\tp0 param: " << seg.EPGeomInfo(0).dist << std::endl
++               << "\tp0 uv: " << seg.GeomInfo(0).u <<", "<< seg.GeomInfo(0).v << std::endl
++            //<< "\tp0 edge: " << seg.GeomInfo(0).trignum << std::endl
++               << "\tp1 param: " << seg.EPGeomInfo(1).dist << std::endl
++               << "\tp1 uv: " << seg.GeomInfo(1).u <<", "<< seg.GeomInfo(1).v << std::endl;
++            //<< "\tp1 edge: " << seg.GeomInfo(1).trignum << std::endl;
+ #endif
+           if ( isSeam )
+           {
+             if ( helper.GetPeriodicIndex() & 1 ) {
+-              seg.epgeominfo[ 0 ].u = otherSeamParam;
+-              seg.epgeominfo[ 1 ].u = otherSeamParam;
+-              swap (seg.epgeominfo[0].v, seg.epgeominfo[1].v);
++              seg.GeomInfo(0).u = otherSeamParam;
++              seg.GeomInfo(1).u = otherSeamParam;
++              swap (seg.GeomInfo(0).v, seg.GeomInfo(1).v);
+             } else {
+-              seg.epgeominfo[ 0 ].v = otherSeamParam;
+-              seg.epgeominfo[ 1 ].v = otherSeamParam;
+-              swap (seg.epgeominfo[0].u, seg.epgeominfo[1].u);
++              seg.GeomInfo(0).v = otherSeamParam;
++              seg.GeomInfo(1).v = otherSeamParam;
++              swap (seg.GeomInfo(0).u, seg.GeomInfo(1).u);
+             }
+             swap (seg[0], seg[1]);
+-            swap (seg.epgeominfo[0].dist, seg.epgeominfo[1].dist);
+-            seg.edgenr = ngMesh.GetNSeg() + 1; // segment id
++            swap (seg.EPGeomInfo(0).dist, seg.EPGeomInfo(1).dist);
++            seg.SetHpElnr(ngMesh.GetNSeg() + 1); // segment id
+             ngMesh.AddSegment (seg);
+ #ifdef DUMP_SEGMENTS
+-            cout << "Segment: " << seg.edgenr << std::endl
++            cout << "Segment: " << seg.GetHpElnr() << std::endl
+                  << "\t is SEAM (reverse) of the previous. "
+                  << " Other " << (helper.GetPeriodicIndex() & 1 ? "U" : "V")
+                  << " = " << otherSeamParam << std::endl;
+@@ -973,11 +973,11 @@ bool NETGENPlugin_Mesher::FillNgMesh(net
+           else if ( fOri == TopAbs_INTERNAL )
+           {
+             swap (seg[0], seg[1]);
+-            swap( seg.epgeominfo[0], seg.epgeominfo[1] );
+-            seg.edgenr = ngMesh.GetNSeg() + 1; // segment id
++            swap( seg.EPGeomInfo(0), seg.EPGeomInfo(1) );
++            seg.SetHpElnr(ngMesh.GetNSeg() + 1); // segment id
+             ngMesh.AddSegment (seg);
+ #ifdef DUMP_SEGMENTS
+-            cout << "Segment: " << seg.edgenr << std::endl << "\t is REVERSE of the previous" << std::endl;
++            cout << "Segment: " << seg.GetHpElnr() << std::endl << "\t is REVERSE of the previous" << std::endl;
+ #endif
+           }
+         }
+@@ -1254,7 +1254,7 @@ bool NETGENPlugin_Mesher::FixFaceMesh(co
+   for ( int iSeg = 1; iSeg <= ngMesh.GetNSeg(); ++iSeg )
+   {
+     const netgen::Segment& seg = ngMesh.LineSegment( iSeg );
+-    if ( seg.si != faceID ) // !edgeIDs.Contains( seg.edgenr ))
++    if ( seg.GetIndex() != faceID ) // !edgeIDs.Contains( seg.GetHpElnr() ))
+       continue;
+     Link link( seg[1], seg[0] ); // reverse!!!
+     if ( !linkMap.Add( link ))
+@@ -1459,11 +1459,11 @@ void NETGENPlugin_Mesher::AddIntVertices
+       for (i = 1; i <= ngMesh.GetNSeg(); ++i)
+       {
+         netgen::Segment & seg = ngMesh.LineSegment(i);
+-        if ( seg.si != faceNgID ) continue;
++        if ( seg.GetIndex() != faceNgID ) continue;
+         gp_XY uv[2];
+         for ( int iEnd = 0; iEnd < 2; ++iEnd)
+         {
+-          uv[iEnd].SetCoord( seg.epgeominfo[iEnd].u, seg.epgeominfo[iEnd].v );
++          uv[iEnd].SetCoord( seg.GeomInfo(iEnd).u, seg.GeomInfo(iEnd).v );
+           if ( ngIdLast == seg[ iEnd ] ) continue;
+           dist2 = helper.ApplyIn2D(surf, uv[iEnd], vData.uv, gp_XY_Subtracted,0).SquareModulus();
+           if ( dist2 < closeDist2 )
+@@ -1494,11 +1494,11 @@ void NETGENPlugin_Mesher::AddIntVertices
+       for (i = nbSegInit+1; i <= ngMesh.GetNSeg(); ++i)
+       {
+         netgen::Segment & seg = ngMesh.LineSegment(i);
+-        if ( seg.si != faceNgID ) continue;
++        if ( seg.GetIndex() != faceNgID ) continue;
+         gp_XY uv[2];
+         for ( int iEnd = 0; iEnd < 2; ++iEnd)
+         {
+-          uv[iEnd].SetCoord( seg.epgeominfo[iEnd].u, seg.epgeominfo[iEnd].v );
++          uv[iEnd].SetCoord( seg.GeomInfo(iEnd).u, seg.GeomInfo(iEnd).v );
+           dist2 = helper.ApplyIn2D(surf, uv[iEnd], vData.uv, gp_XY_Subtracted,0).SquareModulus();
+           if ( dist2 < closeDist2 )
+             vData.ngIdClose = seg[ iEnd ], vData.uvClose = uv[iEnd], closeDist2 = dist2;
+@@ -1542,25 +1542,25 @@ void NETGENPlugin_Mesher::AddIntVertices
+       if ( segEnd1 > segEnd2 ) swap( segEnd1, segEnd2 ), swap( uvV, uvP );
+       seg[0] = segEnd1;  // ng node id
+       seg[1] = segEnd2;  // ng node id
+-      seg.edgenr = ngMesh.GetNSeg() + 1;// segment id
+-      seg.si = faceNgID;
++      seg.SetHpElnr(ngMesh.GetNSeg() + 1);// segment id
++      seg.SetIndex(faceNgID);
+ 
+-      seg.epgeominfo[ 0 ].dist = 0; // param on curve
+-      seg.epgeominfo[ 0 ].u    = uvV.X();
+-      seg.epgeominfo[ 0 ].v    = uvV.Y();
+-      seg.epgeominfo[ 1 ].dist = 1; // param on curve
+-      seg.epgeominfo[ 1 ].u    = uvP.X();
+-      seg.epgeominfo[ 1 ].v    = uvP.Y();
++      seg.EPGeomInfo(0).dist = 0; // param on curve
++      seg.GeomInfo(0).u    = uvV.X();
++      seg.GeomInfo(0).v    = uvV.Y();
++      seg.EPGeomInfo(1).dist = 1; // param on curve
++      seg.GeomInfo(1).u    = uvP.X();
++      seg.GeomInfo(1).v    = uvP.Y();
+ 
+-//       seg.epgeominfo[ 0 ].edgenr = 10; //  = geom.emap.FindIndex(edge);
+-//       seg.epgeominfo[ 1 ].edgenr = 10; //  = geom.emap.FindIndex(edge);
++//       seg.GeomInfo(0).trignum = 10; //  = geom.emap.FindIndex(edge);
++//       seg.GeomInfo(1).trignum = 10; //  = geom.emap.FindIndex(edge);
+ 
+       ngMesh.AddSegment (seg);
+ 
+       // add reverse segment
+       swap (seg[0], seg[1]);
+-      swap( seg.epgeominfo[0], seg.epgeominfo[1] );
+-      seg.edgenr = ngMesh.GetNSeg() + 1; // segment id
++      swap( seg.EPGeomInfo(0), seg.EPGeomInfo(1) );
++      seg.SetHpElnr(ngMesh.GetNSeg() + 1); // segment id
+       ngMesh.AddSegment (seg);
+     }
+ 
+@@ -1930,16 +1930,16 @@ NETGENPlugin_Mesher::AddSegmentsToMesh(n
+ 
+       seg[0]     = ngID1;                // ng node id
+       seg[1]     = ngID2;                // ng node id
+-      seg.edgenr = ngMesh.GetNSeg() + 1; // ng segment id
+-      seg.si     = faceID;               // = geom.fmap.FindIndex (face);
++      seg.SetHpElnr(ngMesh.GetNSeg() + 1); // ng segment id
++      seg.SetIndex(faceID);              // = geom.fmap.FindIndex (face);
+ 
+       for ( int iEnd = 0; iEnd < 2; ++iEnd)
+       {
+         const UVPtStruct& pnt = uvPtVec[ i + iEnd ];
+ 
+-        seg.epgeominfo[ iEnd ].dist = pnt.param; // param on curve
+-        seg.epgeominfo[ iEnd ].u    = pnt.u;
+-        seg.epgeominfo[ iEnd ].v    = pnt.v;
++        seg.EPGeomInfo(iEnd).dist = pnt.param; // param on curve
++        seg.GeomInfo(iEnd).u    = pnt.u;
++        seg.GeomInfo(iEnd).v    = pnt.v;
+ 
+         // find out edge id and node parameter on edge
+         onVertex = ( pnt.normParam + 1e-10 > vertexNormPar );
+@@ -1956,9 +1956,9 @@ NETGENPlugin_Mesher::AddSegmentsToMesh(n
+           posID  = posShapeID;
+           isInternalWire = ( edge.Orientation() == TopAbs_INTERNAL );
+           // if ( onVertex ) // param on curve is different on each of two edges
+-          //   seg.epgeominfo[ iEnd ].dist = helper.GetNodeU( edge, pnt.node );
++          //   seg.EPGeomInfo(iEnd).dist = helper.GetNodeU( edge, pnt.node );
+         }
+-        seg.epgeominfo[ iEnd ].edgenr = edgeID; //  = geom.emap.FindIndex(edge);
++        seg.GeomInfo(iEnd).trignum = edgeID; //  = geom.emap.FindIndex(edge);
+       }
+ 
+       ngMesh.AddSegment (seg);
+@@ -1979,8 +1979,8 @@ NETGENPlugin_Mesher::AddSegmentsToMesh(n
+       if ( isInternalWire )
+       {
+         swap (seg[0], seg[1]);
+-        swap( seg.epgeominfo[0], seg.epgeominfo[1] );
+-        seg.edgenr = ngMesh.GetNSeg() + 1; // segment id
++        swap( seg.EPGeomInfo(0), seg.EPGeomInfo(1) );
++        seg.SetHpElnr(ngMesh.GetNSeg() + 1); // segment id
+         ngMesh.AddSegment (seg);
+       }
+     } // loop on segments on a wire
+@@ -2013,19 +2013,19 @@ NETGENPlugin_Mesher::AddSegmentsToMesh(n
+         netgen::Segment& prevSeg = ngMesh.LineSegment( i-1 );
+         if ( seg[0] == prevSeg[1] && seg[1] == prevSeg[0] )
+         {
+-          cout << "Segment: " << seg.edgenr << std::endl << "\tis REVERSE of the previous one" << std::endl;
++          cout << "Segment: " << seg.GetHpElnr() << std::endl << "\tis REVERSE of the previous one" << std::endl;
+           continue;
+         }
+       }
+-      cout << "Segment: " << seg.edgenr << std::endl
++      cout << "Segment: " << seg.GetHpElnr() << std::endl
+            << "\tp1: " << seg[0] << "   n" << nodeVec[ seg[0]]->GetID() << std::endl
+            << "\tp2: " << seg[1] << "   n" << nodeVec[ seg[1]]->GetID() <<  std::endl
+-           << "\tp0 param: " << seg.epgeominfo[ 0 ].dist << std::endl
+-           << "\tp0 uv: " << seg.epgeominfo[ 0 ].u <<", "<< seg.epgeominfo[ 0 ].v << std::endl
+-           << "\tp0 edge: " << seg.epgeominfo[ 0 ].edgenr << std::endl
+-           << "\tp1 param: " << seg.epgeominfo[ 1 ].dist << std::endl
+-           << "\tp1 uv: " << seg.epgeominfo[ 1 ].u <<", "<< seg.epgeominfo[ 1 ].v << std::endl
+-           << "\tp1 edge: " << seg.epgeominfo[ 1 ].edgenr << std::endl;
++           << "\tp0 param: " << seg.EPGeomInfo(0).dist << std::endl
++           << "\tp0 uv: " << seg.GeomInfo(0).u <<", "<< seg.GeomInfo(0).v << std::endl
++           << "\tp0 edge: " << seg.GeomInfo(0).trignum << std::endl
++           << "\tp1 param: " << seg.EPGeomInfo(1).dist << std::endl
++           << "\tp1 uv: " << seg.GeomInfo(1).u <<", "<< seg.GeomInfo(1).v << std::endl
++           << "\tp1 edge: " << seg.GeomInfo(1).trignum << std::endl;
+     }
+     cout << "--END WIRE " << iW << std::endl;
+ #endif
+@@ -2124,7 +2124,7 @@ int NETGENPlugin_Mesher::FillSMesh(const
+   {
+     const netgen::Segment& seg = ngMesh.LineSegment(i);
+     TopoDS_Edge aEdge;
+-    int pinds[3] = { seg.pnums[0], seg.pnums[1], seg.pnums[2] };
++    int pinds[3] = { seg[0], seg[1], seg[2] };
+     int nbp = 0;
+     double param2 = 0;
+     for (int j=0; j < 3; ++j)
+@@ -2138,11 +2138,11 @@ int NETGENPlugin_Mesher::FillSMesh(const
+       {
+         if (aEdge.IsNull())
+         {
+-          int aGeomEdgeInd = seg.epgeominfo[j].edgenr;
++          int aGeomEdgeInd = seg.GeomInfo(j).trignum;
+           if (aGeomEdgeInd > 0 && aGeomEdgeInd <= occgeo.emap.Extent())
+             aEdge = TopoDS::Edge(occgeo.emap(aGeomEdgeInd));
+         }
+-        param = seg.epgeominfo[j].dist;
++        param = seg.EPGeomInfo(j).dist;
+         param2 += param;
+       }
+       else // middle point
+@@ -2848,8 +2848,8 @@ bool NETGENPlugin_Mesher::Compute()
+           for (int i = 1; i <= _ngMesh->GetNSeg(); i++)
+           {
+             netgen::Segment & seg = _ngMesh->LineSegment(i);
+-            if (seg.si == faceID)
+-              seg.si = 0;
++            if (seg.GetIndex() == faceID)
++              seg.SetIndex(0);
+           }
+           // add new segments to _ngMesh instead of excluded ones
+           helper.SetSubShape( F );
+@@ -3069,7 +3069,7 @@ bool NETGENPlugin_Mesher::Compute()
+           for (int i = 1; i <= _ngMesh->GetNSeg(); ++i)
+           {
+             const netgen::Segment & seg = _ngMesh->LineSegment (i);
+-            if ( seg.epgeominfo[ 0 ].edgenr == 0 )
++            if ( seg.GeomInfo(0).trignum == 0 )
+               _ngMesh->DeleteSegment( i );
+           }
+           _ngMesh->Compress();
+@@ -3358,7 +3358,7 @@ bool NETGENPlugin_Mesher::Evaluate(MapSh
+     const netgen::Segment& seg = ngMesh->LineSegment(i);
+     Link link(seg[0], seg[1]);
+     if ( !linkMap.Add( link )) continue;
+-    int aGeomEdgeInd = seg.epgeominfo[0].edgenr;
++    int aGeomEdgeInd = seg.GeomInfo(0).trignum;
+     if (aGeomEdgeInd > 0 && aGeomEdgeInd <= occgeo.emap.Extent())
+     {
+       vector<int>& aVec = aResMap[_mesh->GetSubMesh(occgeo.emap(aGeomEdgeInd))];
