@@ -1,3 +1,16 @@
+# TODO:
+# - OpenMPI (ompi-cxx)?
+# - BUILD_CLOUD?
+# - BUILD_DRAWING?
+# - BUILD_JTREADER?
+# - BUILD_MATERIAL_EXTERNAL?
+# - BUILD_VR? (BR: OCULUS/Rift SDK 4.x)
+# - FREECAD_USE_EXTERNAL_KDL? (BR: pkgconfig(orocos-kdl) >= 1.4.0, pkgconfig(orocos-kdltk-*) >= 1.4.0)
+# - FREECAD_USE_EXTERNAL_ONDSELSOLVER? (BR: OndselSolver)
+# - FREECAD_USE_EXTERNAL_PYCXX?
+# - FREECAD_USE_PCL? (BR: pcl-devel components: common kdtree features surface io filters segmentation sample_consensus)
+# - USE_CUDA on bcond?
+# - USE_OPENCV?
 #
 # Conditional build:
 %bcond_with	system_smesh	# system version of Salome's Mesh
@@ -16,75 +29,90 @@ Patch0:		apphome.patch
 Patch1:		external-E57Format.patch
 Patch2:		FreeCAD-netgen.patch
 URL:		https://freecad.org/
-# Utilities
-BuildRequires:	boost-python-devel-common
-BuildRequires:	boost-python3-devel
-BuildRequires:	cmake
-BuildRequires:	desktop-file-utils
-BuildRequires:	dos2unix
-BuildRequires:	doxygen
-BuildRequires:	draco-devel
-BuildRequires:	gcc-fortran
-BuildRequires:	gettext
-BuildRequires:	graphviz
-BuildRequires:	libE57Format-devel
-%{?with_system_smesh:BuildRequires:  smesh-devel}
-BuildRequires:	swig
-BuildRequires:	tbb-devel
-BuildRequires:	yaml-cpp-devel
-# Development Libraries
 BuildRequires:	Coin-devel
 BuildRequires:	FreeImage-devel
-BuildRequires:	Mesa-libGLU-devel
 BuildRequires:	OpenCASCADE-devel
+BuildRequires:	OpenGL-devel
+BuildRequires:	OpenGL-GLU-devel
 BuildRequires:	PyCXX
-BuildRequires:	Qt6Concurrent-devel
-BuildRequires:	Qt6Core-devel
-BuildRequires:	Qt6Designer-devel
-BuildRequires:	Qt6Network-devel
-BuildRequires:	Qt6OpenGL-devel
-BuildRequires:	Qt6PrintSupport-devel
-BuildRequires:	Qt6Svg-devel
-BuildRequires:	Qt6Test-devel
-BuildRequires:	Qt6UiTools-devel
-BuildRequires:	Qt6WebEngine-devel
-BuildRequires:	Qt6Widgets-devel
-BuildRequires:	Qt6Xml-devel
+BuildRequires:	Qt6Concurrent-devel >= 6
+BuildRequires:	Qt6Core-devel >= 6
+BuildRequires:	Qt6Designer-devel >= 6
+BuildRequires:	Qt6Network-devel >= 6
+BuildRequires:	Qt6OpenGL-devel >= 6
+BuildRequires:	Qt6PrintSupport-devel >= 6
+BuildRequires:	Qt6Svg-devel >= 6
+BuildRequires:	Qt6UiTools-devel >= 6
+BuildRequires:	Qt6Widgets-devel >= 6
+BuildRequires:	Qt6Xml-devel >= 6
 BuildRequires:	SoQt-devel
-BuildRequires:	appstream-glib-devel
+# components: program_options regex thread date_time
 BuildRequires:	boost-devel >= 1:1.85.0
-BuildRequires:	eigen3
+BuildRequires:	boost-python-devel-common >= 1:1.85.0
+BuildRequires:	boost-python3-devel >= 1:1.85.0
+BuildRequires:	cmake >= 3.22.0
+BuildRequires:	cups-devel
+BuildRequires:	desktop-file-utils
+BuildRequires:	dos2unix
+BuildRequires:	double-conversion-devel
+BuildRequires:	doxygen
+BuildRequires:	draco-devel
+BuildRequires:	eigen3 >= 3.4.0
+BuildRequires:	expat-devel >= 1.95
 BuildRequires:	ffmpeg-devel >= 6.0
+BuildRequires:	freetype-devel >= 2
+BuildRequires:	gcc-fortran
+BuildRequires:	gettext-tools
+BuildRequires:	glew-devel
+BuildRequires:	graphviz
+BuildRequires:	hdf5-devel
 BuildRequires:	hdf5-c++-devel
+BuildRequires:	libE57Format-devel
+BuildRequires:	libfmt-devel
+# OpenMP >= 4.0
+BuildRequires:	libgomp-devel >= 6:5
 BuildRequires:	libicu-devel
+BuildRequires:	libjpeg-devel
+BuildRequires:	libpng-devel
 BuildRequires:	libspnav-devel
+BuildRequires:	libstdc++-devel >= 6:11.2
+BuildRequires:	libtiff-devel
+BuildRequires:	lz4-devel
 BuildRequires:	med-devel
 BuildRequires:	netcdf-cxx4-devel
-BuildRequires:	netgen-mesher-devel
+BuildRequires:	netgen-mesher-devel >= 6.2
 # not needed at the moment
-#BuildRequires:  opencv-devel
-BuildRequires:	python3-PySide6
-BuildRequires:	python3-devel
+#BuildRequires:	opencv-devel
+BuildRequires:	pkgconfig
+BuildRequires:	python3-PySide6 >= 6
+BuildRequires:	python3-devel >= 1:3.10
 BuildRequires:	python3-matplotlib
 BuildRequires:	python3-pivy
 BuildRequires:	python3-pivy-gui
-BuildRequires:	qt6-linguist
-BuildRequires:	shiboken6
-BuildRequires:	vtk-devel
-BuildRequires:	vtk-python3-devel
-BuildRequires:	xerces-c
+BuildRequires:	python3-pybind11
+BuildRequires:	qt6-build >= 6
+BuildRequires:	qt6-linguist >= 6
+BuildRequires:	rpm-build >= 4.6
+BuildRequires:	rpmbuild(macros) >= 2.047
+BuildRequires:	shiboken6 >= 6
+%{?with_system_smesh:BuildRequires:  smesh-devel >= 7.7.1}
+BuildRequires:	swig
+BuildRequires:	tbb-devel
+BuildRequires:	vtk-devel >= 6.2
+BuildRequires:	vtk-python3-devel >= 6.2
 BuildRequires:	xerces-c-devel
-BuildRequires:	xorg-lib-libXmu-devel
+BuildRequires:	xorg-lib-libX11-devel
+BuildRequires:	xz-devel
+BuildRequires:	yaml-cpp-devel
 %{?with_system_zipios:BuildRequires:	zipios++-devel}
+BuildRequires:	zlib-devel
 Requires:	%{name}-data = %{version}-%{release}
 Requires:	glib2 >= 1:2.26.0
-# Needed for plugin support and is not a soname dependency.
 Requires:	hicolor-icon-theme
 Requires:	python3-PySide6
 Requires:	python3-matplotlib
 Requires:	python3-pivy
 Requires:	python3-pivy-gui
-ExcludeArch:	%{ix86} x32
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -144,9 +172,7 @@ GUI instancji FreeCAD-a tak, jak innych widżetów Qt.
 
 %build
 #	-DFREECAD_USE_EXTERNAL_PIVY=TRUE \
-install -d build
-cd build
-%cmake ../ \
+%cmake -B build \
 	-DCMAKE_INSTALL_PREFIX=%{_libdir}/%{name} \
 	-DCMAKE_INSTALL_DATADIR=%{_datadir}/%{name} \
 	-DCMAKE_INSTALL_DOCDIR=%{_docdir}/%{name} \
@@ -155,19 +181,19 @@ cd build
 	-DAPPHOMEPATH=%{_libdir}/%{name} \
 	-DLIBRARYDIR=%{_libdir}/%{name}/lib \
 	-DRESOURCEDIR=%{_datadir}/%{name} \
-	-DENABLE_DEVELOPER_TESTS=OFF \
 	-DBUILD_DESIGNER_PLUGIN=ON \
 	-DBUILD_FEM_NETGEN=ON \
+	-DENABLE_DEVELOPER_TESTS=OFF \
 	-DFREECAD_QT_MAJOR_VERSION=6 \
-	-DQT_DEFAULT_MAJOR_VERSION=6 \
 	-DFREECAD_USE_EXTERNAL_E57FORMAT=ON \
+	-DFREECAD_USE_EXTERNAL_ZIPIOS=%{__ON_OFF system_zipios} \
+	-DQT_DEFAULT_MAJOR_VERSION=6 \
 %if %{with system_smesh}
 	-DFREECAD_USE_EXTERNAL_SMESH=ON \
 	-DSMESH_INCLUDE_DIR=%{_includedir}/smesh \
 %endif
-	%{cmake_on_off system_zipios FREECAD_USE_EXTERNAL_ZIPIOS}
 
-%{__make}
+%{__make} -C build
 
 %install
 rm -rf $RPM_BUILD_ROOT
