@@ -4,6 +4,7 @@
 %bcond_with	system_zipios	# system version of zipios++
 
 Summary:	A general purpose 3D CAD modeler
+Summary(pl.UTF-8):	Modeler CAD 3D ogólnego przeznaczenia
 Name:		FreeCAD
 Version:	1.1.3
 Release:	2
@@ -95,16 +96,31 @@ parametric modeler with a modular software architecture which makes it
 easy to provide additional functionality without modifying the core
 system.
 
+%description -l pl.UTF-8
+FreeCAD to mający otwarte źródła modeler CAD/MCAD/CAx/CAE/PLM 3D
+ogólnego przeznaczenia, przeznaczony bezpośrednio do inżynierii
+mechanicznej oraz projektowania wyrobów, ale nadający się także do
+szerszego zakresu prac inżynierskich, takich jak architektura czy
+inne specjalizacje. Jest to modeler parametryczny o modularnej
+architekturze programowej, ułatwiający dodawanie nowej funkcjonalności
+bez modyfikowania podstawowego systemu.
+
 %package data
 Summary:	Data files for FreeCAD
+Summary(pl.UTF-8):	Pliki danych FreeCAD-a
+Group:		Applications/Engineering
 Requires:	%{name} = %{version}-%{release}
 BuildArch:	noarch
 
 %description data
 Data files for FreeCAD.
 
+%description data -l pl.UTF-8
+Pliki danych FreeCAD-a.
+
 %package -n Qt6Designer-plugin-%{name}
-Summary:	FreeCad plugin for Qt Designer
+Summary:	FreeCAD plugin for Qt Designer
+Summary(pl.UTF-8):	Wtyczka FreeCAD do Qt Designera
 Group:		X11/Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 Requires:	Qt6Designer >= 6
@@ -112,6 +128,10 @@ Requires:	Qt6Designer >= 6
 %description -n Qt6Designer-plugin-%{name}
 FreeCAD plugin for Qt Designer that allows FreeCAD instances to
 be included in GUI designs just like any other Qt widget.
+
+%description -n Qt6Designer-plugin-%{name} -l pl.UTF-8
+Wtyczka FreeCAD do Qt Designera, pozwalająca na włączanie w projektach
+GUI instancji FreeCAD-a tak, jak innych widżetów Qt.
 
 %prep
 %setup -q -c
@@ -151,6 +171,7 @@ cd build
 
 %install
 rm -rf $RPM_BUILD_ROOT
+
 %{__make} -C build install \
 	DESTDIR=$RPM_BUILD_ROOT
 
