@@ -175,7 +175,7 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} -C build install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-%py3_ocomp $RPM_BUILD_ROOT{py3_sitescriptdir}
+%py3_ocomp $RPM_BUILD_ROOT%{py3_sitescriptdir}
 
 %{__rm} -r $RPM_BUILD_ROOT{%{_includedir},%{_npkgconfigdir}}
 %{__rm} -r $RPM_BUILD_ROOT%{_docdir}/FreeCAD
@@ -206,13 +206,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/FreeCAD
 %attr(755,root,root) %{_bindir}/FreeCADCmd
 %attr(755,root,root) %{_bindir}/freecad-thumbnailer
-%{_datadir}/metainfo/*.xml
-%{_desktopdir}/*.desktop
-%{_iconsdir}/hicolor/*x*/apps/org.freecad.FreeCAD.png
-%{_iconsdir}/hicolor/scalable/apps/org.freecad.FreeCAD.svg
-%{_iconsdir}/hicolor/scalable/mimetypes/application-x-extension-fcstd.svg
-%{_pixmapsdir}/freecad.svg
-%{_datadir}/mime/packages/*.xml
 %dir %{_libdir}/%{name}
 %{_libdir}/%{name}/Ext
 %{_libdir}/%{name}/Mod
@@ -220,11 +213,19 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/%{name}/lib/*.so
 %{_libdir}/%{name}/lib/libOndselSolver.so.*
 %{py3_sitescriptdir}/freecad
+%{_datadir}/metainfo/org.freecad.FreeCAD.metainfo.xml
+%{_datadir}/mime/packages/org.freecad.FreeCAD.xml
 %{_datadir}/thumbnailers/FreeCAD.thumbnailer
+%{_desktopdir}/org.freecad.FreeCAD.desktop
+%{_iconsdir}/hicolor/*x*/apps/org.freecad.FreeCAD.png
+%{_iconsdir}/hicolor/scalable/apps/org.freecad.FreeCAD.svg
+%{_iconsdir}/hicolor/scalable/mimetypes/application-x-extension-fcstd.svg
+%{_pixmapsdir}/freecad.svg
 
 %files data
 %defattr(644,root,root,755)
 %{_datadir}/%{name}
 
 %files -n Qt6Designer-plugin-%{name}
+%defattr(644,root,root,755)
 %{_libdir}/qt6/plugins/designer/libFreeCAD_widgets.so
