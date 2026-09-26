@@ -20,7 +20,7 @@ Summary:	A general purpose 3D CAD modeler
 Summary(pl.UTF-8):	Modeler CAD 3D ogólnego przeznaczenia
 Name:		FreeCAD
 Version:	1.1.3
-Release:	2
+Release:	3
 License:	LGPL v2
 Group:		Applications/Engineering
 Source0:	https://github.com/FreeCAD/FreeCAD/releases/download/%{version}/freecad_source_%{version}.tar.gz
