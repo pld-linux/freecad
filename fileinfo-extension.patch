@@ -1,0 +1,31 @@
+# extension()/completeExtension() searched the whole path, so a dot in a directory name
+# (e.g. /tmp/B.xyz/target) yielded a bogus extension for files without one
+--- a/src/Base/FileInfo.cpp	2026-09-28 23:42:16.837030524 +0200
++++ b/src/Base/FileInfo.cpp	2026-09-28 23:42:16.911231473 +0200
+@@ -258,20 +258,22 @@
+ 
+ std::string FileInfo::extension() const
+ {
+-    std::string::size_type pos = FileName.find_last_of('.');
++    std::string name = fileName();
++    std::string::size_type pos = name.find_last_of('.');
+     if (pos == std::string::npos) {
+         return {};
+     }
+-    return FileName.substr(pos + 1);
++    return name.substr(pos + 1);
+ }
+ 
+ std::string FileInfo::completeExtension() const
+ {
+-    std::string::size_type pos = FileName.find_first_of('.');
++    std::string name = fileName();
++    std::string::size_type pos = name.find_first_of('.');
+     if (pos == std::string::npos) {
+         return {};
+     }
+-    return FileName.substr(pos + 1);
++    return name.substr(pos + 1);
+ }
+ 
+ bool FileInfo::hasExtension(const char* Ext) const

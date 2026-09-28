@@ -29,6 +29,8 @@ Patch1:		external-E57Format.patch
 Patch2:		FreeCAD-netgen.patch
 Patch3:		test-lineformat.patch
 Patch4:		cam-offset-occ793.patch
+Patch5:		fileinfo-extension.patch
+Patch6:		unit-pow-round.patch
 URL:		https://freecad.org/
 BuildRequires:	Coin-devel
 # 7.8 cmake exports linked draco, FreeImage, freetype, tk, X11 by path/name; 7.9 exports only OCC and VTK targets
@@ -162,6 +164,8 @@ GUI instancji FreeCAD-a tak, jak innych widżetów Qt.
 %patch -P2 -p1
 %patch -P3 -p1
 %patch -P4 -p1
+%patch -P5 -p1
+%patch -P6 -p1
 
 # don't force color diagnostics if output is not terminal
 %{__sed} -i -e 's/-fdiagnostics-color //' cMake/FreeCAD_Helpers/CompilerChecksAndSetups.cmake
@@ -198,8 +202,17 @@ GUI instancji FreeCAD-a tak, jak innych widżetów Qt.
 # user config and caches go to $HOME
 export HOME=$(pwd)/build/tests-home
 export QT_QPA_PLATFORM=offscreen
-ctest --test-dir build --output-on-failure %{?_smp_mflags} -E FileInfoTest
 # FileInfoTest cases share one scratch dir, https://github.com/FreeCAD/FreeCAD/issues/28737
+ctest_exclude='FileInfoTest'
+%ifarch %{ix86}
+# exact floating point comparisons that x87 excess precision does not meet
+ctest_exclude="$ctest_exclude|^BaseQuantityLoc\.psi_|^Vector\.TestIsNormal$|^SMesh\.testMefisto$"
+%endif
+%ifarch x32
+# shiboken6 segfaults in PyStaticMethod_New when these tests start PySide
+ctest_exclude="$ctest_exclude|^(Assistant|CameraPrecalculatedQuaternions|CameraRotation|StyleParametersApplicationTest)\.|^(DlgVersionMigrator|QuantitySpinBox)_Tests_run$"
+%endif
+ctest --test-dir build --output-on-failure %{?_smp_mflags} -E "$ctest_exclude"
 ctest --test-dir build --output-on-failure -R FileInfoTest
 build/bin/FreeCADCmd -t 0
 %endif

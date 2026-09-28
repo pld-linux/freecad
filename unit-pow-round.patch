@@ -1,0 +1,12 @@
+# truncating val * exp gives 0 instead of 1 for 3 * (1.0 / 3) with x87 excess precision (i686)
+--- a/src/Base/Unit.cpp	2026-09-28 22:12:48.203002723 +0200
++++ b/src/Base/Unit.cpp	2026-09-28 22:12:48.277269019 +0200
+@@ -215,7 +215,7 @@
+             throw UnitsMismatchError("pow() of unit not possible");
+         }
+ 
+-        return static_cast<decltype(val)>(val * exp);
++        return static_cast<decltype(val)>(std::round(num));
+     };
+ 
+     UnitExponents res {};
