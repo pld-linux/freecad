@@ -1,40 +1,42 @@
 # TODO:
-# - OpenMPI (ompi-cxx)?
-# - BUILD_CLOUD?
-# - BUILD_DRAWING?
-# - BUILD_JTREADER?
-# - BUILD_MATERIAL_EXTERNAL?
-# - BUILD_VR? (BR: OCULUS/Rift SDK 4.x)
-# - FREECAD_USE_EXTERNAL_KDL? (BR: pkgconfig(orocos-kdl) >= 1.4.0, pkgconfig(orocos-kdltk-*) >= 1.4.0)
-# - FREECAD_USE_EXTERNAL_ONDSELSOLVER? (BR: OndselSolver)
-# - FREECAD_USE_EXTERNAL_PYCXX?
-# - FREECAD_USE_PCL? (BR: pcl-devel components: common kdtree features surface io filters segmentation sample_consensus)
-# - USE_CUDA on bcond?
-# - USE_OPENCV?
+# - BUILD_MATERIAL_EXTERNAL? (bundled lru-cache only)
+#
+# Not applicable:
+# - BUILD_CLOUD (does not compile, removed upstream: https://github.com/FreeCAD/FreeCAD/pull/30651)
+# - BUILD_DRAWING, BUILD_JTREADER, BUILD_VR (modules absent from the tarball)
+# - FREECAD_USE_EXTERNAL_KDL (lookup commented out upstream, bundled kdl is extended)
+# - FREECAD_USE_EXTERNAL_ONDSELSOLVER (FreeCAD-only submodule without releases of its own)
+# - FREECAD_USE_EXTERNAL_PYCXX (pkgconfig-only; PLD PyCXX ships no .pc, paths passed directly)
+# - OpenMPI (only for med built with MPI)
+# - USE_CUDA, USE_OPENCV (no build logic behind them)
 #
 # Conditional build:
+%bcond_without	pcl		# PCL-based reverse engineering features
 %bcond_with	system_smesh	# system version of Salome's Mesh
 %bcond_with	system_zipios	# system version of zipios++
+%bcond_without	tests		# unit tests
 
 Summary:	A general purpose 3D CAD modeler
 Summary(pl.UTF-8):	Modeler CAD 3D ogólnego przeznaczenia
 Name:		FreeCAD
 Version:	1.1.3
-Release:	3
+Release:	4
 License:	LGPL v2
 Group:		Applications/Engineering
 Source0:	https://github.com/FreeCAD/FreeCAD/releases/download/%{version}/freecad_source_%{version}.tar.gz
 # Source0-md5:	355c28ccdabc1afedc9adbc247c490bf
-Patch0:		apphome.patch
 Patch1:		external-E57Format.patch
 Patch2:		FreeCAD-netgen.patch
+Patch3:		test-lineformat.patch
+Patch4:		cam-offset-occ793.patch
 URL:		https://freecad.org/
 BuildRequires:	Coin-devel
-BuildRequires:	FreeImage-devel
-BuildRequires:	OpenCASCADE-devel
+# 7.8 cmake exports linked draco, FreeImage, freetype, tk, X11 by path/name; 7.9 exports only OCC and VTK targets
+BuildRequires:	OpenCASCADE-devel >= 7.9.3
 BuildRequires:	OpenGL-devel
 BuildRequires:	OpenGL-GLU-devel
-BuildRequires:	PyCXX
+# 7.1.x uses _Py_PackageContext, gone from Python 3.13 headers
+BuildRequires:	PyCXX >= 7.2.0
 BuildRequires:	Qt6Concurrent-devel >= 6
 BuildRequires:	Qt6Core-devel >= 6
 BuildRequires:	Qt6Designer-devel >= 6
@@ -42,6 +44,7 @@ BuildRequires:	Qt6Network-devel >= 6
 BuildRequires:	Qt6OpenGL-devel >= 6
 BuildRequires:	Qt6PrintSupport-devel >= 6
 BuildRequires:	Qt6Svg-devel >= 6
+%{?with_tests:BuildRequires:	Qt6Test-devel >= 6}
 BuildRequires:	Qt6UiTools-devel >= 6
 BuildRequires:	Qt6Widgets-devel >= 6
 BuildRequires:	Qt6Xml-devel >= 6
@@ -51,38 +54,27 @@ BuildRequires:	boost-devel >= 1:1.85.0
 BuildRequires:	boost-python-devel-common >= 1:1.85.0
 BuildRequires:	boost-python3-devel >= 1:1.85.0
 BuildRequires:	cmake >= 3.22.0
-BuildRequires:	cups-devel
 BuildRequires:	desktop-file-utils
-BuildRequires:	dos2unix
-BuildRequires:	double-conversion-devel
-BuildRequires:	doxygen
-BuildRequires:	draco-devel
 BuildRequires:	eigen3 >= 3.4.0
-BuildRequires:	expat-devel >= 1.95
-BuildRequires:	ffmpeg-devel >= 6.0
 BuildRequires:	freetype-devel >= 2
 BuildRequires:	gcc-fortran
-BuildRequires:	gettext-tools
-BuildRequires:	glew-devel
-BuildRequires:	graphviz
+%{?with_tests:BuildRequires:	gmock-devel}
+%{?with_tests:BuildRequires:	gtest-devel}
 BuildRequires:	hdf5-devel
-BuildRequires:	hdf5-c++-devel
 BuildRequires:	libE57Format-devel
 BuildRequires:	libfmt-devel
 # OpenMP >= 4.0
 BuildRequires:	libgomp-devel >= 6:5
 BuildRequires:	libicu-devel
-BuildRequires:	libjpeg-devel
-BuildRequires:	libpng-devel
 BuildRequires:	libspnav-devel
 BuildRequires:	libstdc++-devel >= 6:11.2
-BuildRequires:	libtiff-devel
-BuildRequires:	lz4-devel
 BuildRequires:	med-devel
-BuildRequires:	netcdf-cxx4-devel
-BuildRequires:	netgen-mesher-devel >= 6.2
+# FreeCAD-netgen.patch uses Segment::EPGeomInfo() accessors, absent in 6.2.2404
+BuildRequires:	netgen-mesher-devel >= 6.2.2607
 # not needed at the moment
 #BuildRequires:	opencv-devel
+# 1.14.1-3 ships Modules/ that PCLConfig.cmake includes
+%{?with_pcl:BuildRequires:	pcl-devel >= 1.14.1-3}
 BuildRequires:	pkgconfig
 BuildRequires:	python3-PySide6 >= 6
 BuildRequires:	python3-devel >= 1:3.10
@@ -97,12 +89,12 @@ BuildRequires:	rpmbuild(macros) >= 2.047
 BuildRequires:	shiboken6 >= 6
 %{?with_system_smesh:BuildRequires:  smesh-devel >= 7.7.1}
 BuildRequires:	swig
-BuildRequires:	tbb-devel
-BuildRequires:	vtk-devel >= 6.2
-BuildRequires:	vtk-python3-devel >= 6.2
+# 9.3.1-20 -devel pulls in the -devels vtk-config.cmake runs find_package() for
+BuildRequires:	vtk-devel >= 9.3.1-20
+# 9.3.1-21 fixes the Python 3.13 segfault on import (FEM tests import vtkmodules)
+BuildRequires:	vtk-python3-devel >= 9.3.1-21
 BuildRequires:	xerces-c-devel
 BuildRequires:	xorg-lib-libX11-devel
-BuildRequires:	xz-devel
 BuildRequires:	yaml-cpp-devel
 %{?with_system_zipios:BuildRequires:	zipios++-devel}
 BuildRequires:	zlib-devel
@@ -111,6 +103,9 @@ Requires:	glib2 >= 1:2.26.0
 Requires:	hicolor-icon-theme
 Requires:	python3-PySide6
 Requires:	python3-matplotlib
+# FEM Netgen mesher runs a python script importing netgen.occ/pyngcore/numpy
+Requires:	python3-netgen-mesher
+Requires:	python3-numpy
 Requires:	python3-pivy
 Requires:	python3-pivy-gui
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -163,30 +158,34 @@ GUI instancji FreeCAD-a tak, jak innych widżetów Qt.
 
 %prep
 %setup -q -c
-%patch -P0 -p1
 %patch -P1 -p1
 %patch -P2 -p1
+%patch -P3 -p1
+%patch -P4 -p1
 
 # don't force color diagnostics if output is not terminal
 %{__sed} -i -e 's/-fdiagnostics-color //' cMake/FreeCAD_Helpers/CompilerChecksAndSetups.cmake
 
 %build
 #	-DFREECAD_USE_EXTERNAL_PIVY=TRUE \
+# install dirs relative to AppHomePath (the binary location), so data and libs are found from the build tree too
 %cmake -B build \
 	-DCMAKE_INSTALL_PREFIX=%{_libdir}/%{name} \
-	-DCMAKE_INSTALL_DATADIR=%{_datadir}/%{name} \
+	-DCMAKE_INSTALL_BINDIR=bin \
+	-DCMAKE_INSTALL_DATADIR=../../share/%{name} \
 	-DCMAKE_INSTALL_DOCDIR=%{_docdir}/%{name} \
 	-DCMAKE_INSTALL_INCLUDEDIR=%{_includedir} \
-	-DCMAKE_INSTALL_LIBDIR=%{_libdir}/%{name}/lib \
-	-DAPPHOMEPATH=%{_libdir}/%{name} \
-	-DLIBRARYDIR=%{_libdir}/%{name}/lib \
-	-DRESOURCEDIR=%{_datadir}/%{name} \
+	-DCMAKE_INSTALL_LIBDIR=lib \
 	-DBUILD_DESIGNER_PLUGIN=ON \
 	-DBUILD_FEM_NETGEN=ON \
-	-DENABLE_DEVELOPER_TESTS=OFF \
+	-DENABLE_DEVELOPER_TESTS=%{__ON_OFF tests} \
 	-DFREECAD_QT_MAJOR_VERSION=6 \
 	-DFREECAD_USE_EXTERNAL_E57FORMAT=ON \
+	-DFREECAD_USE_EXTERNAL_GTEST=ON \
 	-DFREECAD_USE_EXTERNAL_ZIPIOS=%{__ON_OFF system_zipios} \
+	-DFREECAD_USE_PCL=%{__ON_OFF pcl} \
+	-DPYCXX_INCLUDE_DIRS=%{py3_incdir} \
+	-DPYCXX_SOURCE_DIR=%{_datadir}/python%{py3_ver}/CXX \
 	-DQT_DEFAULT_MAJOR_VERSION=6 \
 %if %{with system_smesh}
 	-DFREECAD_USE_EXTERNAL_SMESH=ON \
@@ -195,11 +194,27 @@ GUI instancji FreeCAD-a tak, jak innych widżetów Qt.
 
 %{__make} -C build
 
+%if %{with tests}
+# user config and caches go to $HOME
+export HOME=$(pwd)/build/tests-home
+export QT_QPA_PLATFORM=offscreen
+ctest --test-dir build --output-on-failure %{?_smp_mflags} -E FileInfoTest
+# FileInfoTest cases share one scratch dir, https://github.com/FreeCAD/FreeCAD/issues/28737
+ctest --test-dir build --output-on-failure -R FileInfoTest
+build/bin/FreeCADCmd -t 0
+%endif
+
 %install
 rm -rf $RPM_BUILD_ROOT
 
 %{__make} -C build install \
 	DESTDIR=$RPM_BUILD_ROOT
+
+# AppHomePath is derived from the real path of the binary
+install -d $RPM_BUILD_ROOT%{_bindir}
+for f in FreeCAD FreeCADCmd freecad-thumbnailer; do
+	ln -s %{_libdir}/%{name}/bin/$f $RPM_BUILD_ROOT%{_bindir}/$f
+done
 
 %py3_ocomp $RPM_BUILD_ROOT%{py3_sitescriptdir}
 
@@ -229,10 +244,14 @@ rm -rf $RPM_BUILD_ROOT
 %doc README.md SECURITY.md
 %doc build/usr/share/doc/FreeCAD/LICENSE.html
 %doc build/usr/share/doc/FreeCAD/ThirdPartyLibraries.html
-%attr(755,root,root) %{_bindir}/FreeCAD
-%attr(755,root,root) %{_bindir}/FreeCADCmd
-%attr(755,root,root) %{_bindir}/freecad-thumbnailer
+%{_bindir}/FreeCAD
+%{_bindir}/FreeCADCmd
+%{_bindir}/freecad-thumbnailer
 %dir %{_libdir}/%{name}
+%dir %{_libdir}/%{name}/bin
+%attr(755,root,root) %{_libdir}/%{name}/bin/FreeCAD
+%attr(755,root,root) %{_libdir}/%{name}/bin/FreeCADCmd
+%attr(755,root,root) %{_libdir}/%{name}/bin/freecad-thumbnailer
 %{_libdir}/%{name}/Ext
 %{_libdir}/%{name}/Mod
 %dir %{_libdir}/%{name}/lib
