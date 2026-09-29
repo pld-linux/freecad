@@ -1,0 +1,17 @@
+# vtkIdType is 32-bit on i686/x32, int(1e10) raises OverflowError there
+--- a/src/Mod/Fem/femobjects/post_glyphfilter.py	2026-09-29 00:59:50.426335529 +0200
++++ b/src/Mod/Fem/femobjects/post_glyphfilter.py	2026-09-29 00:59:50.436186758 +0200
+@@ -130,11 +130,11 @@
+         if obj.MaskMode == "Use All":
+             masking.RandomModeOff()
+             masking.SetOnRatio(1)
+-            masking.SetMaximumNumberOfPoints(int(1e10))
++            masking.SetMaximumNumberOfPoints(masking.GetMaximumNumberOfPointsMaxValue())
+         elif obj.MaskMode == "Every Nth":
+             masking.RandomModeOff()
+             masking.SetOnRatio(obj.Stride)
+-            masking.SetMaximumNumberOfPoints(int(1e10))
++            masking.SetMaximumNumberOfPoints(masking.GetMaximumNumberOfPointsMaxValue())
+         else:
+             masking.SetOnRatio(1)
+             masking.SetMaximumNumberOfPoints(obj.MaxNumber)
