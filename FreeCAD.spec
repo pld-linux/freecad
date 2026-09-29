@@ -1,9 +1,7 @@
-# TODO:
-# - BUILD_MATERIAL_EXTERNAL? (bundled lru-cache only)
-#
 # Not applicable:
 # - BUILD_CLOUD (does not compile, removed upstream: https://github.com/FreeCAD/FreeCAD/pull/30651)
 # - BUILD_DRAWING, BUILD_JTREADER, BUILD_VR (modules absent from the tarball)
+# - BUILD_MATERIAL_EXTERNAL (API for external material databases; its only backend, the MaterialDB addon, is an unreleased 0.0.1 prototype)
 # - FREECAD_USE_EXTERNAL_KDL (lookup commented out upstream, bundled kdl is extended)
 # - FREECAD_USE_EXTERNAL_ONDSELSOLVER (FreeCAD-only submodule without releases of its own)
 # - FREECAD_USE_EXTERNAL_PYCXX (pkgconfig-only; PLD PyCXX ships no .pc, paths passed directly)
@@ -231,7 +229,7 @@ rm -rf $RPM_BUILD_ROOT
 # AppHomePath is derived from the real path of the binary
 install -d $RPM_BUILD_ROOT%{_bindir}
 for f in FreeCAD FreeCADCmd freecad-thumbnailer; do
-	ln -s %{_libdir}/%{name}/bin/$f $RPM_BUILD_ROOT%{_bindir}/$f
+	ln -s ../%{_lib}/%{name}/bin/$f $RPM_BUILD_ROOT%{_bindir}/$f
 done
 
 %py3_ocomp $RPM_BUILD_ROOT%{py3_sitescriptdir}
