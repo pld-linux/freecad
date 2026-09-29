@@ -19,18 +19,19 @@
 Summary:	A general purpose 3D CAD modeler
 Summary(pl.UTF-8):	Modeler CAD 3D ogólnego przeznaczenia
 Name:		FreeCAD
-Version:	1.1.3
-Release:	4
+Version:	1.1.4
+Release:	1
 License:	LGPL v2
 Group:		Applications/Engineering
 Source0:	https://github.com/FreeCAD/FreeCAD/releases/download/%{version}/freecad_source_%{version}.tar.gz
-# Source0-md5:	355c28ccdabc1afedc9adbc247c490bf
+# Source0-md5:	59bf65d8df3e999d340483d854cf4333
 Patch1:		external-E57Format.patch
 Patch2:		FreeCAD-netgen.patch
 Patch3:		test-lineformat.patch
 Patch4:		cam-offset-occ793.patch
 Patch5:		fileinfo-extension.patch
 Patch6:		unit-pow-round.patch
+Patch7:		fem-glyph-idtype.patch
 URL:		https://freecad.org/
 BuildRequires:	Coin-devel
 # 7.8 cmake exports linked draco, FreeImage, freetype, tk, X11 by path/name; 7.9 exports only OCC and VTK targets
@@ -166,6 +167,7 @@ GUI instancji FreeCAD-a tak, jak innych widżetów Qt.
 %patch -P4 -p1
 %patch -P5 -p1
 %patch -P6 -p1
+%patch -P7 -p1
 
 # don't force color diagnostics if output is not terminal
 %{__sed} -i -e 's/-fdiagnostics-color //' cMake/FreeCAD_Helpers/CompilerChecksAndSetups.cmake
@@ -214,7 +216,10 @@ ctest_exclude="$ctest_exclude|^(Assistant|CameraPrecalculatedQuaternions|CameraR
 %endif
 ctest --test-dir build --output-on-failure %{?_smp_mflags} -E "$ctest_exclude"
 ctest --test-dir build --output-on-failure -R FileInfoTest
+%ifnarch %{ix86}
+# CAM Adaptive does not converge with x87 math, TestPathAdaptive loops for hours
 build/bin/FreeCADCmd -t 0
+%endif
 %endif
 
 %install
